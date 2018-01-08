@@ -293,6 +293,12 @@ public class GridViewHolder extends RecyclerView.ViewHolder implements Serializa
 		} else {
 			popupMenu.getMenu().findItem(R.id.block_channel).setVisible(false);
 		}
+		if (youTubeVideo.getChannelId() != null) {
+			menu.findItem(R.id.open_channel).setVisible(true);
+			if (!SubscriptionsDb.getSubscriptionsDb().isUserSubscribedToChannel(youTubeVideo.getChannelId())) {
+				menu.findItem(R.id.subscribe_channel).setVisible(true);
+			}
+		}
 		popupMenu.setOnMenuItemClickListener(item -> {
 			switch(item.getItemId()) {
 				case R.id.menu_open_video_with:
@@ -333,6 +339,12 @@ public class GridViewHolder extends RecyclerView.ViewHolder implements Serializa
 					if (decision == Policy.ALLOW) {
 						youTubeVideo.downloadVideo(context);
 					}
+					return true;
+				case R.id.subscribe_channel:
+					YouTubeChannel.subscribeChannel(context, popupMenu.getMenu(), youTubeVideo.getChannelId());
+					return true;
+				case R.id.open_channel:
+					SkyTubeApp.launchChannel(youTubeVideo.getChannelId(), context);
 					return true;
 				case R.id.block_channel:
 					youTubeVideo.getChannel().blockChannel();
