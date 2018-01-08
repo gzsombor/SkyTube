@@ -526,6 +526,13 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		} else {
 			menu.findItem(R.id.download_video).setVisible(false);
 		}
+		if (youTubeVideo != null && youTubeVideo.getChannelId() != null) {
+			menu.findItem(R.id.subscribe_channel).setVisible(true);
+			menu.findItem(R.id.open_channel).setVisible(true);
+		} else {
+			menu.findItem(R.id.subscribe_channel).setVisible(false);
+			menu.findItem(R.id.open_channel).setVisible(false);
+		}
 	}
 
 
