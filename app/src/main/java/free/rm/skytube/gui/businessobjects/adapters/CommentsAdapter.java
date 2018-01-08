@@ -45,6 +45,7 @@ import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeComment;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeCommentThread;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetYouTubeChannelInfoTask;
 import free.rm.skytube.gui.activities.MainActivity;
+import free.rm.skytube.gui.businessobjects.YouTubePlayer;
 import free.rm.skytube.gui.fragments.ChannelBrowserFragment;
 
 /**
@@ -204,10 +205,7 @@ public class CommentsAdapter extends BaseExpandableListAdapter {
 			thumbnailImageView.setOnClickListener(view -> {
 				if(comment.getAuthorChannelId() != null) {
 					new GetYouTubeChannelInfoTask(context, youTubeChannel -> {
-						Intent i = new Intent(context, MainActivity.class);
-						i.setAction(MainActivity.ACTION_VIEW_CHANNEL);
-						i.putExtra(ChannelBrowserFragment.CHANNEL_OBJ, youTubeChannel);
-						context.startActivity(i);
+						YouTubePlayer.launchChannel(youTubeChannel, context);
 					}).executeInParallel(comment.getAuthorChannelId());
 				}
 			});
