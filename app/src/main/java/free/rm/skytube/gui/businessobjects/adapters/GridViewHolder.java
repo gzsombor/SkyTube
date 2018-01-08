@@ -316,9 +316,7 @@ public class GridViewHolder extends RecyclerView.ViewHolder implements Serializa
 		}
 		if (youTubeVideo.getChannelId() != null) {
 			menu.findItem(R.id.open_channel).setVisible(true);
-			if (!SubscriptionsDb.getSubscriptionsDb().isUserSubscribedToChannel(youTubeVideo.getChannelId())) {
-				menu.findItem(R.id.subscribe_channel).setVisible(true);
-			}
+			updateSubscribeMenuItem(youTubeVideo.getChannelId(), menu);
 		}
 		popupMenu.setOnMenuItemClickListener(item -> {
 			switch(item.getItemId()) {
