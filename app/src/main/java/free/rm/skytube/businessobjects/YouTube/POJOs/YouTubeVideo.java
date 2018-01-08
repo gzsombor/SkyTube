@@ -51,11 +51,17 @@ import free.rm.skytube.BuildConfig;
 import free.rm.skytube.R;
 import free.rm.skytube.businessobjects.FileDownloader;
 import free.rm.skytube.businessobjects.Logger;
+import free.rm.skytube.businessobjects.YouTube.GetChannelsDetails;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetVideoStreamTask;
+import free.rm.skytube.businessobjects.YouTube.Tasks.GetYouTubeChannelInfoTask;
 import free.rm.skytube.businessobjects.YouTube.VideoStream.StreamMetaData;
 import free.rm.skytube.businessobjects.db.BookmarksDb;
 import free.rm.skytube.businessobjects.db.DownloadedVideosDb;
+import free.rm.skytube.businessobjects.db.SubscriptionsDb;
 import free.rm.skytube.businessobjects.interfaces.GetDesiredStreamListener;
+import free.rm.skytube.gui.businessobjects.YouTubePlayer;
+import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
+import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
 
 import static free.rm.skytube.app.SkyTubeApp.getContext;
 import static free.rm.skytube.app.SkyTubeApp.getStr;
@@ -459,6 +465,43 @@ public class YouTubeVideo implements Serializable {
 		ClipData clip = ClipData.newPlainText("Video URL", getVideoUrl());
 		clipboard.setPrimaryClip(clip);
 		Toast.makeText(context, R.string.url_copied_to_clipboard, Toast.LENGTH_SHORT).show();
+	}
+
+    public void openChannel(final Context context) {
+		final String channelId = getChannelId();
+		if (channelId != null) {
+			new GetYouTubeChannelInfoTask(context, new YouTubeChannelInterface() {
+				@Override
+				public void onGetYouTubeChannel(YouTubeChannel youTubeChannel) {
+					YouTubePlayer.launchChannel(youTubeChannel, context);
+				}
+			}).executeInParallel(channelId);
+		}
+	}
+
+	public void subscribeChannel(final Context context, final Menu menu) {
+		final String channelId = getChannelId();
+		if (channelId != null) {
+			new GetYouTubeChannelInfoTask(context, new YouTubeChannelInterface() {
+
+				@Override
+				public void onGetYouTubeChannel(YouTubeChannel youTubeChannel) {
+					if (SubscriptionsDb.getSubscriptionsDb().subscribe(youTubeChannel)) {
+						youTubeChannel.setUserSubscribed(true);
+						SubsAdapter adapter = SubsAdapter.get(context);
+						adapter.appendChannel(youTubeChannel);
+						SubscriptionsFeedFragment.refreshSubsFeedFromCache();
+						Toast.makeText(context, "Channel subscribed", Toast.LENGTH_LONG).show();
+					} else {
+						Toast.makeText(context, "Subscription failed", Toast.LENGTH_LONG).show();
+					}
+
+				}
+			}).executeInParallel(channelId);
+
+		} else {
+			Toast.makeText(context, "Channel is not specified", Toast.LENGTH_LONG).show();
+		}
 	}
 
 
