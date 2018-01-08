@@ -696,6 +696,14 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 						menu.findItem(R.id.download_video).setVisible(true);
 					}
 				}));
+
+		if (youTubeVideo != null && youTubeVideo.getChannelId() != null) {
+			menu.findItem(R.id.subscribe_channel).setVisible(true);
+			menu.findItem(R.id.open_channel).setVisible(true);
+		} else {
+			menu.findItem(R.id.subscribe_channel).setVisible(false);
+			menu.findItem(R.id.open_channel).setVisible(false);
+		}
 	}
 
 	@Override
@@ -762,6 +770,14 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
             case R.id.block_channel:
 	            compositeDisposable.add(youTubeChannel.blockChannel().subscribe());
 				return true;
+			case R.id.subscribe_channel:
+				YouTubeChannel.subscribeChannel(getContext(), menu, youTubeVideo.getChannelId());
+				return true;
+
+			case R.id.open_channel:
+				SkyTubeApp.launchChannel(youTubeVideo.getChannelId(), getContext());
+				return true;
+
 			default:
 				return super.onOptionsItemSelected(item);
 		}

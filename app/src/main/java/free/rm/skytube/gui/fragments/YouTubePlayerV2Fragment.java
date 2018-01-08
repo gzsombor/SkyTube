@@ -571,7 +571,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		}
 	}
 
-
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		final MenuItem downloadVideo = menu.findItem(R.id.download_video);
@@ -584,8 +583,25 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				}
 			});
 		}
-	}
 
+		final MenuItem subscribeChannel = menu.findItem(R.id.subscribe_channel);
+		final MenuItem openChannel = menu.findItem(R.id.open_channel);
+		if (youTubeVideo != null && youTubeVideo.getChannelId() != null) {
+			if (subscribeChannel != null) {
+				subscribeChannel.setVisible(true);
+			}
+			if (openChannel != null) {
+				openChannel.setVisible(true);
+			}
+		} else {
+			if (subscribeChannel != null) {
+				subscribeChannel.setVisible(false);
+			}
+			if (openChannel != null) {
+				openChannel.setVisible(false);
+			}
+		}
+	}
 
 	@Override
 	public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
