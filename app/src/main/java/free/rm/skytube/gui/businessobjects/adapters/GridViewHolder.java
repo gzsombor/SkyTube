@@ -40,6 +40,7 @@ import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.PlaybackStatusDb;
+import free.rm.skytube.businessobjects.db.SubscriptionsDb;
 import free.rm.skytube.businessobjects.db.Tasks.IsVideoBookmarkedTask;
 import free.rm.skytube.businessobjects.db.Tasks.IsVideoWatchedTask;
 import free.rm.skytube.gui.activities.ThumbnailViewerActivity;
@@ -206,6 +207,12 @@ public class GridViewHolder extends RecyclerView.ViewHolder implements Serializa
 		} else {
 			popupMenu.getMenu().findItem(R.id.delete_download).setVisible(false);
 		}
+		if (youTubeVideo.getChannelId() != null) {
+			menu.findItem(R.id.open_channel).setVisible(true);
+			if (!SubscriptionsDb.getSubscriptionsDb().isUserSubscribedToChannel(youTubeVideo.getChannelId())) {
+				menu.findItem(R.id.subscribe_channel).setVisible(true);
+			}
+		}
 		popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
@@ -254,6 +261,12 @@ public class GridViewHolder extends RecyclerView.ViewHolder implements Serializa
 						if (!warningDialogDisplayed) {
 							youTubeVideo.downloadVideo(context);
 						}
+						return true;
+					case R.id.subscribe_channel:
+						youTubeVideo.subscribeChannel(context, popupMenu.getMenu());
+						return true;
+					case R.id.open_channel:
+						youTubeVideo.openChannel(context);
 						return true;
 					case R.id.block_channel:
 						youTubeVideo.getChannel().blockChannel();
