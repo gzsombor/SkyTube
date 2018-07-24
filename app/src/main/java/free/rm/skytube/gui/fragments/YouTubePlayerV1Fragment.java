@@ -495,6 +495,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 		saveVideoPosition(videoCurrentPosition);
 
 		saveCurrentBrightness();
+		hideHud();
 		super.onPause();
 	}
 
