@@ -120,7 +120,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	public boolean saveSubscription(YouTubeChannel channel) {
 		ContentValues values = new ContentValues();
 		values.put(SubscriptionsTable.COL_CHANNEL_ID, channel.getId());
-		values.put(SubscriptionsTable.COL_LAST_VISIT_TIME, System.currentTimeMillis());
+		values.put(SubscriptionsTable.COL_LAST_VISIT_TIME, channel.getLastVisitTime());
 		values.put(SubscriptionsTable.COL_TITLE, channel.getTitle());
 		values.put(SubscriptionsTable.COL_DESCRIPTION, channel.getDescription());
 		values.put(SubscriptionsTable.COL_BANNER_URL, channel.getBannerUrl());
