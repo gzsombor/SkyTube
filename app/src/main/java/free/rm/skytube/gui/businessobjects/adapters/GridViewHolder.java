@@ -265,6 +265,7 @@ class GridViewHolder extends RecyclerView.ViewHolder {
 						return true;
 					case R.id.block_channel:
 						youTubeVideo.getChannel().blockChannel();
+						return true;
 				}
 				return false;
 			}
