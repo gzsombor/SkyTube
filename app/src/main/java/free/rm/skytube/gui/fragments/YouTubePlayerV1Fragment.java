@@ -116,6 +116,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 	private float                   startBrightness = -1.0f;
 	private float                   startVolumePercent  = -1.0f;
 	private int                     startVideoTime = -1;
+	private boolean prepared = false;
 
 	/** Timeout (in milliseconds) before the HUD (i.e. media controller + action/title bar) is hidden. */
 	private static final int HUD_VISIBILITY_TIMEOUT = 5000;
@@ -175,6 +176,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 	 * @param view Fragment view.
 	 */
 	private void initViews(View view) {
+		prepared = false;
 		loadingVideoView = view.findViewById(R.id.loadingVideoView);
 
 		videoView = view.findViewById(R.id.video_view);
@@ -338,6 +340,10 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 					return;
 				}
 
+				if (!prepared) {
+					return;
+				}
+
 				if (adjustPercent < -1.0f) {
 					adjustPercent = -1.0f;
 				} else if (adjustPercent > 1.0f) {
@@ -489,6 +495,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 
 	@Override
 	public void onPrepared(MediaPlayer mediaPlayer) {
+		prepared = true;
 		loadingVideoView.setVisibility(View.GONE);
 		videoView.seekTo(videoCurrentPosition);
 		videoView.start();
