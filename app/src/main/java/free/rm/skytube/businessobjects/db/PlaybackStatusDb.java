@@ -18,7 +18,7 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 	private static HashMap<String, VideoWatchedStatus> playbackHistoryMap = null;
 
 	private static final int DATABASE_VERSION = 1;
-	private static boolean hasUpdated = false;
+	private int updateCounter = 0;
 	private static final String DATABASE_NAME = "playbackhistory.db";
 
 	public static synchronized PlaybackStatusDb getPlaybackStatusDb() {
@@ -41,7 +41,7 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 	public void deleteAllPlaybackHistory() {
 		getWritableDatabase().delete(PlaybackStatusTable.TABLE_NAME, null, null);
 		playbackHistoryMap = null;
-		hasUpdated = true;
+		updateCounter++;
 	}
 
 	@Override
@@ -105,26 +105,14 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 		if(position < 5000)
 			return false;
 
-		int watched = 0;
+		boolean watched = false;
 		// If the user has stopped watching the video and the position is greater than 90% of the duration, mark the video as watched and reset position
 		if((float)position / (video.getDurationInSeconds()*1000) >= 0.9) {
-			watched = 1;
+			watched = true;
 			position = 0;
 		}
 
-		ContentValues values = new ContentValues();
-		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_ID, video.getId());
-		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_POSITION, (int)position);
-		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_WATCHED, watched);
-
-		playbackHistoryMap.get(video.getId()).position = position;
-		playbackHistoryMap.get(video.getId()).watched = watched == 1;
-
-		boolean addSuccessful = getWritableDatabase().insertWithOnConflict(PlaybackStatusTable.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1;
-		if(addSuccessful)
-				hasUpdated = true;
-
-		return addSuccessful;
+		return saveVideoWatchStatus(video.getId(), position, watched);
 	}
 
 	/**
@@ -136,19 +124,31 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 	 * @return boolean on whether the database was updated successfully.
 	 */
 	public boolean setVideoWatchedStatus(YouTubeVideo video, boolean watched) {
+		return saveVideoWatchStatus(video.getId(), 0, watched);
+	}
+
+	private boolean saveVideoWatchStatus(String videoId, long position, boolean watched) {
 		ContentValues values = new ContentValues();
-		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_ID, video.getId());
-		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_POSITION, 0);
+		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_ID, videoId);
+		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_POSITION, (int)position);
 		values.put(PlaybackStatusTable.COL_YOUTUBE_VIDEO_WATCHED, watched ? 1 : 0);
 
-		playbackHistoryMap.get(video.getId()).watched = watched;
-		playbackHistoryMap.get(video.getId()).position = 0;
+		boolean addSuccessful = getWritableDatabase().insertWithOnConflict(PlaybackStatusTable.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1;
+		if(addSuccessful) {
+			updateCounter++;
+		}
 
-		boolean success = getWritableDatabase().insertWithOnConflict(PlaybackStatusTable.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1;
-		if(success)
-			hasUpdated = true;
-		return success;
+		VideoWatchedStatus status = playbackHistoryMap.get(videoId);
+		if (status == null) {
+			status = new VideoWatchedStatus();
+			playbackHistoryMap.put(videoId, status);
+		}
+		status.position = position;
+		status.watched = watched;
+
+		return addSuccessful;
 	}
+
 
 	/**
 	 * Class that contains the position and watched status of a video.
@@ -182,15 +182,13 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 	}
 
 	/**
-	 * Whether or not the database has been updated. If it has, the VideoGrid will refresh.
+	 * Return the number of updates happened to the playback status
+	 * If it different than the VideoGrid has, it needs to be refreshed.
 	 *
-	 * @return boolean
+	 * @return int updateCounter
 	 */
-	public static boolean isHasUpdated() {
-		return hasUpdated;
+	public int getUpdateCounter() {
+		return updateCounter;
 	}
 
-	public static void setHasUpdated(boolean hasUpdated) {
-		PlaybackStatusDb.hasUpdated = hasUpdated;
-	}
 }
