@@ -242,13 +242,13 @@ public class MainFragment extends FragmentEx {
 
 			if (bookmarksFragment == null) {
 				bookmarksFragment = new BookmarksFragment();
-				BookmarksDb.getBookmarksDb().addListener(bookmarksFragment);
 			}
+			BookmarksDb.getBookmarksDb().addListener(bookmarksFragment);
 
 			if(downloadedVideosFragment == null) {
 				downloadedVideosFragment = new DownloadedVideosFragment();
-				DownloadedVideosDb.getVideoDownloadsDb().setListener(downloadedVideosFragment);
 			}
+			DownloadedVideosDb.getVideoDownloadsDb().setListener(downloadedVideosFragment);
 
 			Set<String> hiddenFragments = SkyTubeApp.getPreferenceManager().getStringSet(getString(R.string.pref_key_hide_tabs), new HashSet<>());
 
