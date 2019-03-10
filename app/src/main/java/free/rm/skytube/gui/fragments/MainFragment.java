@@ -208,13 +208,13 @@ public class MainFragment extends FragmentEx {
 
 			if (bookmarksFragment == null) {
 				bookmarksFragment = new BookmarksFragment();
-				BookmarksDb.getBookmarksDb().addListener(bookmarksFragment);
 			}
+			BookmarksDb.getBookmarksDb().addListener(bookmarksFragment);
 
 			if(downloadedVideosFragment == null) {
 				downloadedVideosFragment = new DownloadedVideosFragment();
-				DownloadedVideosDb.getVideoDownloadsDb().setListener(downloadedVideosFragment);
 			}
+			DownloadedVideosDb.getVideoDownloadsDb().setListener(downloadedVideosFragment);
 
 			// add fragments to list:  do NOT forget to ***UPDATE*** @string/default_tab and @string/default_tab_values
 			videoGridFragmentsList.clear();
