@@ -80,7 +80,7 @@ dependencies {
     implementation 'com.github.TeamNewPipe:NewPipeExtractor:560c648e92476cc220a036f1668c4335b98ceece'
 
     // other modules
-    implementation group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.1.Final'
+    implementation group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.2.Final'
     implementation 'com.github.moraisigor:slidingdrawer:1.6.7'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
