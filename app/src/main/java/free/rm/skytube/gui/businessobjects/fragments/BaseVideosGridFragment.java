@@ -64,7 +64,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 	@Override
 	public void onRefresh() {
 		videoGridAdapter.refresh(true);
-		updateCount = PlaybackStatusDb.getVideoDownloadsDb().getUpdateCounter();
+		updateCount = PlaybackStatusDb.getPlaybackStatusDb().getUpdateCounter();
 	}
 
 	/**
@@ -75,7 +75,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 	public void onResume() {
 		super.onResume();
 		videoGridAdapter.refreshActiveGridViewHolder();
-		int newUpdateCounter = PlaybackStatusDb.getVideoDownloadsDb().getUpdateCounter();
+		int newUpdateCounter = PlaybackStatusDb.getPlaybackStatusDb().getUpdateCounter();
 		if(newUpdateCounter != updateCount) {
 			videoGridAdapter.notifyDataSetChanged();
 			updateCount = newUpdateCounter;
