@@ -19,13 +19,13 @@ package free.rm.skytube.gui.businessobjects;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.PlaybackStatusDb;
+import kotlin.Unit;
 
 /**
  * Class to encapsulate the functionality to ask the user, if they want to resume playing
@@ -59,17 +59,19 @@ public class ResumeVideoTask {
                 new SkyTubeMaterialDialog(context)
                         .content(R.string.should_resume)
                         .positiveText(R.string.resume)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        .onPositive(new SkyTubeMaterialDialog.DialogCallback() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            public Unit invoke(@NonNull MaterialDialog dialog) {
                                 callback.loadVideo((int) watchStatus.getPosition());
+                                return null;
                             }
                         })
                         .negativeText(R.string.no)
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        .onNegative(new SkyTubeMaterialDialog.DialogCallback() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            public Unit invoke(@NonNull MaterialDialog dialog) {
                                 callback.loadVideo(0);
+                                return null;
                             }
                         })
                         .show();

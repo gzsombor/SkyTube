@@ -29,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -59,6 +58,7 @@ import free.rm.skytube.gui.businessobjects.MediaControllerEx;
 import free.rm.skytube.gui.businessobjects.MobileNetworkWarningDialog;
 import free.rm.skytube.gui.businessobjects.OnSwipeTouchListener;
 import free.rm.skytube.gui.businessobjects.ResumeVideoTask;
+import free.rm.skytube.gui.businessobjects.SkyTubeMaterialDialog;
 import free.rm.skytube.gui.businessobjects.YouTubeVideoListener;
 import free.rm.skytube.gui.businessobjects.adapters.CommentsAdapter;
 import free.rm.skytube.gui.businessobjects.fragments.ImmersiveModeFragment;
@@ -66,6 +66,7 @@ import free.rm.skytube.gui.businessobjects.views.ClickableLinksTextView;
 import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
 import hollowsoft.slidingdrawer.OnDrawerOpenListener;
 import hollowsoft.slidingdrawer.SlidingDrawer;
+import kotlin.Unit;
 
 import static free.rm.skytube.gui.activities.YouTubePlayerActivity.YOUTUBE_VIDEO_OBJ;
 
@@ -730,10 +731,11 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 
 			case R.id.download_video:
 				final boolean warningDialogDisplayed = new MobileNetworkWarningDialog(getContext())
-						.onPositive(new MaterialDialog.SingleButtonCallback() {
+						.onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 							@Override
-							public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+							public Unit invoke(@NonNull MaterialDialog dialog) {
 								youTubeVideo.downloadVideo(getContext());
+								return null;
 							}
 						})
 						.showAndGetStatus(MobileNetworkWarningDialog.ActionType.DOWNLOAD_VIDEO);
@@ -780,16 +782,18 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 		// if the user is using mobile network (i.e. 4g), then warn him
 		if (!skipMobileNetworkWarning) {
 			mobileNetworkWarningDialogDisplayed = new MobileNetworkWarningDialog(getActivity())
-					.onPositive(new MaterialDialog.SingleButtonCallback() {
+					.onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 						@Override
-						public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+						public Unit invoke(@NonNull MaterialDialog dialog) {
 							loadVideo(true);
+							return null;
 						}
 					})
-					.onNegative(new MaterialDialog.SingleButtonCallback() {
+					.onNegative(new SkyTubeMaterialDialog.DialogCallback() {
 						@Override
-						public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+						public Unit invoke(@NonNull MaterialDialog dialog) {
 							closeActivity();
+							return null;
 						}
 					})
 					.showAndGetStatus(MobileNetworkWarningDialog.ActionType.STREAM_VIDEO);

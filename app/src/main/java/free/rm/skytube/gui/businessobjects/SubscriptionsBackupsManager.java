@@ -18,7 +18,6 @@ import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
@@ -45,6 +44,7 @@ import free.rm.skytube.businessobjects.db.Tasks.UnsubscribeFromAllChannelsTask;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
 import free.rm.skytube.gui.businessobjects.preferences.BackupDatabases;
 import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
+import kotlin.Unit;
 
 /**
  * Custom class to handle Backups and Subscriptions imports. This class must be instantiated using either a native Fragment
@@ -298,9 +298,9 @@ public class SubscriptionsBackupsManager {
 				new MultiSelectListPreferenceDialog(activity, channels)
 						.title(R.string.import_subscriptions)
 						.positiveText(R.string.import_subscriptions)
-						.onPositive(new MaterialDialog.SingleButtonCallback() {
+						.onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 							@Override
-							public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+							public Unit invoke(@NonNull MaterialDialog dialog) {
 								// if the user checked the "Unsubscribe to all subscribed channels" checkbox
 								if (isUnsubsribeAllChecked) {
 									new UnsubscribeFromAllChannelsTask().executeInParallel();
@@ -315,16 +315,9 @@ public class SubscriptionsBackupsManager {
 								// subscribe to the channels selected by the user
 								SubscribeToImportedChannelsTask task = new SubscribeToImportedChannelsTask();
 								task.executeInParallel(channelsToSubscribeTo);
+								return null;
 							}
 						})
-						.negativeText(R.string.cancel)
-						.onNegative(new MaterialDialog.SingleButtonCallback() {
-							@Override
-							public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-								dialog.dismiss();
-							}
-						})
-						.build()
 						.show();
 			} else {
 				new AlertDialog.Builder(activity)
@@ -350,25 +343,20 @@ public class SubscriptionsBackupsManager {
 				.title(R.string.import_subscriptions)
 				.content(msg)
 				.positiveText(R.string.select_xml_file)
-				.checkBoxPromptRes(R.string.unsubscribe_from_all_current_sibbed_channels, false, new CompoundButton.OnCheckedChangeListener() {
+				.checkBoxPromptRes(R.string.unsubscribe_from_all_current_sibbed_channels, null,false, new SkyTubeMaterialDialog.CheckboxCallback() {
 					@Override
-					public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-						isUnsubsribeAllChecked = true;
+					public Unit invoke(Boolean subscribe) {
+						isUnsubsribeAllChecked = subscribe;
+						return null;
 					}
 				})
-				.onPositive(new MaterialDialog.SingleButtonCallback() {
+				.onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 					@Override
-					public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+					public Unit invoke(@NonNull MaterialDialog dialog) {
 						displayFilePicker(false);
+						return null;
 					}
 				})
-				.onNegative(new MaterialDialog.SingleButtonCallback() {
-					@Override
-					public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-						dialog.dismiss();
-					}
-				})
-				.build()
 				.show();
 	}
 
@@ -394,10 +382,8 @@ public class SubscriptionsBackupsManager {
 		@Override
 		protected void onPreExecute() {
 			// display the "Subscribing to channels …" dialog
-			dialog = new MaterialDialog.Builder(activity)
-					.content(R.string.subscribing_to_channels)
-					.progress(true, 0)
-					.build();
+			dialog = new MaterialDialog(activity, MaterialDialog.getDEFAULT_BEHAVIOR())
+					.message(R.string.subscribing_to_channels, null, null);
 			dialog.show();
 		}
 

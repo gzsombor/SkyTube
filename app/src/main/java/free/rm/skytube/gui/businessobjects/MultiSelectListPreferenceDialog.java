@@ -45,7 +45,8 @@ public class MultiSelectListPreferenceDialog extends SkyTubeMaterialDialog {
 		super(context);
 
 		// set the custom view to be placed inside this dialog
-		customView(R.layout.subs_youtube_import_dialog_list, false);
+		customView(R.layout.subs_youtube_import_dialog_list, null,
+				false, false, false, false);
 	}
 
 
@@ -78,29 +79,28 @@ public class MultiSelectListPreferenceDialog extends SkyTubeMaterialDialog {
 
 
 	@Override
-	public MaterialDialog build() {
-		MaterialDialog materialDialog = super.build();
+	public MaterialDialog show() {
+		super.show();
 
-		RecyclerView list = materialDialog.getCustomView().findViewById(R.id.channel_list);
+		RecyclerView list = getCustomView().findViewById(R.id.channel_list);
 		list.setAdapter(listAdapter);
-		list.setLayoutManager(new LinearLayoutManager(materialDialog.getContext()));
+		list.setLayoutManager(new LinearLayoutManager(dialog.getContext()));
 
-		Button selectAllButton = materialDialog.getCustomView().findViewById(R.id.select_all_button);
+		Button selectAllButton = getCustomView().findViewById(R.id.select_all_button);
 		selectAllButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				listAdapter.selectAll();
 			}
 		});
-		Button selectNoneButton = materialDialog.getCustomView().findViewById(R.id.select_none_button);
+		Button selectNoneButton = getCustomView().findViewById(R.id.select_none_button);
 		selectNoneButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				listAdapter.selectNone();
 			}
 		});
-
-		return materialDialog;
+		return dialog;
 	}
 
 

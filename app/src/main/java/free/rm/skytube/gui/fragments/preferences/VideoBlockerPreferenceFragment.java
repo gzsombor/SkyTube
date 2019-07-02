@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import android.text.InputType;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.schabi.newpipe.extractor.NewPipe;
@@ -22,6 +21,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import kotlin.Unit;
 
 import free.rm.skytube.BuildConfig;
 import free.rm.skytube.R;
@@ -221,9 +222,9 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 			setItems(getLanguagesAvailable());
 
 			title(R.string.pref_title_preferred_languages);
-			onPositive(new MaterialDialog.SingleButtonCallback() {
+			onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 				@Override
-				public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+				public Unit invoke(@NonNull MaterialDialog dialog) {
 					final Set<String> preferredLangIsoCodes = getSelectedItemsIds();
 
 					// if at least one language was selected, then save the settings
@@ -238,6 +239,7 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 						// no languages were selected... action is ignored
 						Toast.makeText(getActivity(), R.string.no_preferred_lang_selected, Toast.LENGTH_LONG).show();
 					}
+					return null;
 				}
 			});
 		}
@@ -316,9 +318,9 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 
 			title(R.string.pref_title_channel_blacklist);
 			positiveText(R.string.unblock);
-			onPositive(new MaterialDialog.SingleButtonCallback() {
+			onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 				@Override
-				public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+				public Unit invoke(@NonNull MaterialDialog dialog) {
 					final List<MultiSelectListPreferenceItem> channels = getSelectedItems();
 
 					if (channels != null  &&  !channels.isEmpty()) {
@@ -332,6 +334,7 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 					}
 
 					dialog.dismiss();
+					return null;
 				}
 			});
 		}
@@ -354,13 +357,13 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 			setItems(ChannelFilteringDb.getChannelFilteringDb().getWhitelistedChannels());
 
 			// when the "Add" button is clicked, do not close this dialog...
-			autoDismiss(false);
+			noAutoDismiss();
 
 			title(R.string.pref_title_channel_whitelist);
 			positiveText(R.string.block);
-			onPositive(new MaterialDialog.SingleButtonCallback() {
+			onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 				@Override
-				public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+				public Unit invoke(@NonNull MaterialDialog dialog) {
 					final List<YouTubeChannel> channelList = toYouTubeChannelList(getSelectedItems());
 
 					if (!channelList.isEmpty()) {
@@ -380,14 +383,16 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 					}
 
 					dialog.dismiss();
+					return null;
 				}
 			});
 
 			neutralText(R.string.add);
-			onNeutral(new MaterialDialog.SingleButtonCallback() {
+			onNeutral(new SkyTubeMaterialDialog.DialogCallback(){
 				@Override
-				public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+				public Unit invoke(@NonNull MaterialDialog dialog) {
 					displayInputChannelUrlDialog();
+					return null;
 				}
 			});
 		}
@@ -413,7 +418,6 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 		 */
 		private void displayInputChannelUrlDialog() {
 			new SkyTubeMaterialDialog(getActivity())
-					.autoDismiss(true)
 					.content(R.string.input_channel_url)
 					.positiveText(R.string.add)
 					.inputType(InputType.TYPE_TEXT_VARIATION_URI)
@@ -467,7 +471,6 @@ public class VideoBlockerPreferenceFragment extends PreferenceFragment {
 		@Override
 		protected void onPreExecute() {
 			getChannelInfoDialog = new SkyTubeMaterialDialog(getActivity())
-					.progress(true, 0)
 					.content(R.string.please_wait)
 					.positiveText("")
 					.negativeText("")

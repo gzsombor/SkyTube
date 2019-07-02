@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Lists;
 
@@ -38,6 +37,7 @@ import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.YouTube.VideoBlocker;
 import free.rm.skytube.gui.activities.PreferencesActivity;
 import free.rm.skytube.gui.fragments.preferences.VideoBlockerPreferenceFragment;
+import kotlin.Unit;
 
 import static android.preference.PreferenceActivity.EXTRA_SHOW_FRAGMENT;
 
@@ -64,11 +64,13 @@ public class BlockedVideosDialog extends SkyTubeMaterialDialog {
 			title(R.string.blocked_videos);
 			adapter(new BlockedVideosAdapter(context, Lists.reverse(blockedVideos)), null);     // invert the list of blocked videos
 			neutralText(R.string.clear);
-			onNeutral(new MaterialDialog.SingleButtonCallback() {
+			onNeutral(new SkyTubeMaterialDialog.DialogCallback() {
 				@Override
-				public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-					if (listener != null)
+				public Unit invoke(@NonNull MaterialDialog dialog) {
+					if (listener != null) {
 						listener.onClearBlockedVideos();
+					}
+					return null;
 				}
 			});
 
@@ -76,14 +78,15 @@ public class BlockedVideosDialog extends SkyTubeMaterialDialog {
 		}
 
 		positiveText(R.string.configure);
-		onPositive(new MaterialDialog.SingleButtonCallback() {
+		onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 			@Override
-			public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+			public Unit invoke(@NonNull MaterialDialog dialog) {
 				// display the PreferenceActivity where the Videos Blocker tab is selected/opened
 				// by default
 				final Intent i = new Intent(context, PreferencesActivity.class);
 				i.putExtra(EXTRA_SHOW_FRAGMENT, VideoBlockerPreferenceFragment.class.getName());
 				context.startActivity(i);
+				return null;
 			}
 		});
 	}

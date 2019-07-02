@@ -26,6 +26,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
+import kotlin.Unit;
 
 /**
  * Dialog that warns the user to enable the wi-fi if the device is connected to mobile network
@@ -54,10 +55,11 @@ public class MobileNetworkWarningDialog extends SkyTubeMaterialDialog {
 		if (SkyTubeApp.isConnectedToMobile() && displayWarning) {
 			title(R.string.mobile_data);
 			content(actionType == ActionType.STREAM_VIDEO ? R.string.warning_mobile_network_play : R.string.warning_mobile_network_download);
-			checkBoxPromptRes(R.string.warning_mobile_network_disable, false, new CompoundButton.OnCheckedChangeListener() {
+			checkBoxPromptRes(R.string.warning_mobile_network_disable,null, false, new SkyTubeMaterialDialog.CheckboxCallback() {
 				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				public Unit invoke(Boolean isChecked) {
 					SkyTubeApp.getPreferenceManager().edit().putBoolean(SkyTubeApp.getStr(R.string.pref_key_warn_mobile_downloads), !isChecked).apply();
+					return null;
 				}
 			});
 			positiveText(actionType == ActionType.STREAM_VIDEO ?  R.string.play_video : R.string.download_video);
@@ -70,15 +72,15 @@ public class MobileNetworkWarningDialog extends SkyTubeMaterialDialog {
 
 
 	@Override
-	public MobileNetworkWarningDialog onPositive(@NonNull MaterialDialog.SingleButtonCallback callback) {
-		this.onPositiveCallback = callback;
+	public MobileNetworkWarningDialog onPositive(@NonNull SkyTubeMaterialDialog.DialogCallback callback) {
+		this.positiveCallback = callback;
 		return this;
 	}
 
 
 	@Override
-	public MobileNetworkWarningDialog onNegative(@NonNull MaterialDialog.SingleButtonCallback callback) {
-		this.onNegativeCallback = callback;
+	public MobileNetworkWarningDialog onNegative(@NonNull SkyTubeMaterialDialog.DialogCallback callback) {
+		this.negativeCallback = callback;
 		return this;
 	}
 

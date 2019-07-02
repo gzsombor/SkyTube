@@ -29,7 +29,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -44,7 +43,9 @@ import free.rm.skytube.businessobjects.db.Tasks.IsVideoWatchedTask;
 import free.rm.skytube.gui.activities.ThumbnailViewerActivity;
 import free.rm.skytube.gui.businessobjects.MainActivityListener;
 import free.rm.skytube.gui.businessobjects.MobileNetworkWarningDialog;
+import free.rm.skytube.gui.businessobjects.SkyTubeMaterialDialog;
 import free.rm.skytube.gui.businessobjects.YouTubePlayer;
+import kotlin.Unit;
 
 /**
  * A ViewHolder for the videos grid view.
@@ -245,10 +246,11 @@ class GridViewHolder extends RecyclerView.ViewHolder {
 						return true;
 					case R.id.download_video:
 						final boolean warningDialogDisplayed = new MobileNetworkWarningDialog(view.getContext())
-								.onPositive(new MaterialDialog.SingleButtonCallback() {
+								.onPositive(new SkyTubeMaterialDialog.DialogCallback() {
 									@Override
-									public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+									public Unit invoke(@NonNull MaterialDialog dialog) {
 										youTubeVideo.downloadVideo(context);
+										return null;
 									}
 								})
 								.showAndGetStatus(MobileNetworkWarningDialog.ActionType.DOWNLOAD_VIDEO);
