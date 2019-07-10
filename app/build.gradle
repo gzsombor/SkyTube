@@ -103,7 +103,7 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
     }
     implementation 'com.mikepenz:actionitembadge:3.3.2@aar'
-    implementation "com.mikepenz:iconics-core:3.0.3@aar"
+    implementation "com.mikepenz:iconics-core:4.0.0@aar"
 
     // Android support modules
     implementation 'androidx.appcompat:appcompat:1.0.2'
