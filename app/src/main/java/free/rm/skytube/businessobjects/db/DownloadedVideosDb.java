@@ -112,7 +112,7 @@ public class DownloadedVideosDb extends SQLiteOpenHelperEx implements OrderableD
 		values.put(DownloadedVideosTable.COL_YOUTUBE_VIDEO, gson.toJson(video).getBytes());
 		values.put(DownloadedVideosTable.COL_FILE_URI, fileUri);
 
-		int order = getNumDownloads();
+		int order = getMaximumOrderNumber();
 		order++;
 		values.put(DownloadedVideosTable.COL_ORDER, order);
 
@@ -204,10 +204,10 @@ public class DownloadedVideosDb extends SQLiteOpenHelperEx implements OrderableD
 	}
 
 	/**
-	 * @return The total number of downloaded videos.
+	 * @return The maximum of the order number - which could be different from the number of downloaded files, in case some of them are deleted.
 	 */
-	public int getNumDownloads() {
-		String	query = String.format("SELECT COUNT(*) FROM %s", DownloadedVideosTable.TABLE_NAME);
+	public int getMaximumOrderNumber() {
+		String	query = String.format("SELECT MAX(%s) FROM %s", DownloadedVideosTable.COL_ORDER, DownloadedVideosTable.TABLE_NAME);
 		Cursor	cursor = DownloadedVideosDb.getVideoDownloadsDb().getReadableDatabase().rawQuery(query, null);
 		int		totalDownloads = 0;
 
