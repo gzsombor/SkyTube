@@ -38,6 +38,9 @@ import com.google.api.services.youtube.model.VideoStatistics;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.schabi.newpipe.extractor.channel.ChannelExtractor;
+import org.schabi.newpipe.extractor.exceptions.ParsingException;
+import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 
 import java.io.File;
 import java.io.Serializable;
@@ -56,7 +59,6 @@ import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.FileDownloader;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetVideoDescriptionTask;
-import free.rm.skytube.businessobjects.YouTube.GetChannelsDetails;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetVideoStreamTask;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetYouTubeChannelInfoTask;
 import free.rm.skytube.businessobjects.YouTube.VideoStream.StreamMetaData;
@@ -215,6 +217,15 @@ public class YouTubeVideo implements Serializable {
 		setThumbsUpPercentage(likeCount, dislikeCount);
 	}
 
+
+	public YouTubeVideo(String id, StreamInfoItem channelItem, ChannelExtractor channel) throws ParsingException {
+		this.id = id;
+		this.title = channelItem.getName();
+		this.thumbnailUrl = channelItem.getThumbnailUrl();
+		this.thumbnailMaxResUrl = channelItem.getThumbnailUrl();
+		setViewCount(BigInteger.valueOf(channelItem.getViewCount()));
+		this.channel = new YouTubeChannel(channel.getId(), channel.getName());
+	}
 	/**
 	 * Extracts the video ID from the given video URL.
 	 *
