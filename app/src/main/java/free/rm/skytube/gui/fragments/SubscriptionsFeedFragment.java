@@ -40,6 +40,7 @@ import free.rm.skytube.app.FeedUpdateTask;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.FeedUpdaterService;
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.VideoCategory;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetSubscriptionVideosTaskListener;
 import free.rm.skytube.gui.businessobjects.SubscriptionsBackupsManager;
@@ -258,6 +259,7 @@ public class SubscriptionsFeedFragment extends VideosGridFragment implements Get
 	}
 
 	public void refreshFeedFromCache() {
+		Logger.i(this, "refreshFeedFromCache "+ videoGridAdapter);
 		if (videoGridAdapter != null) {
 			videoGridAdapter.refresh(true);
 		}

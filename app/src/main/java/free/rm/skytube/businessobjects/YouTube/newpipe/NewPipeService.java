@@ -229,7 +229,6 @@ public class NewPipeService {
             throw new NewPipeException("Getting comments for " + videoId + " fails:" + e.getMessage(), e);
         }
     }
-
     /**
      * Return detailed information for a channel from it's id.
      * @param channelId
@@ -380,6 +379,7 @@ public class NewPipeService {
         try {
             SearchExtractor extractor = streamingService.getSearchExtractor(query);
             extractor.fetchPage();
+            Logger.i(this, "getSearchResult for %s -> %s", query, extractor.getOriginalUrl());
             return new VideoPager(streamingService, extractor);
         } catch (ExtractionException | IOException | RuntimeException e) {
             throw new NewPipeException("Getting search result for " + query + " fails:" + e.getMessage(), e);
