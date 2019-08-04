@@ -57,6 +57,7 @@ public class GetPlaylistVideos extends GetYouTubeVideos {
 		if (!noMoreVideoPages()) {
 			try {
 				playlistItemsList.setPageToken(nextPageToken);
+		                Logger.i(this, "YoutubeAPI call playlistItemsList: " + playlistItemsList);
 
 				PlaylistItemListResponse response = playlistItemsList.execute();
 
