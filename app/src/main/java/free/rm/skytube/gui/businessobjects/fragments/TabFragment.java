@@ -18,6 +18,7 @@
 package free.rm.skytube.gui.businessobjects.fragments;
 
 import androidx.viewpager.widget.ViewPager;
+import free.rm.skytube.businessobjects.Logger;
 
 /**
  * A fragment that will act as a tab.
@@ -42,7 +43,7 @@ public abstract class TabFragment extends FragmentEx {
 	 * called when inherited.
 	 */
 	public void onFragmentSelected() {
-		System.out.println(getFragmentName() + " selected" );
+		Logger.d(this, getFragmentName() + " selected" );
 		isFragmentSelected = true;
 	}
 
@@ -52,7 +53,7 @@ public abstract class TabFragment extends FragmentEx {
 	 * selected.
 	 */
 	public void onFragmentUnselected() {
-		System.out.println(getFragmentName() + " UNselected" );
+		Logger.d(this, getFragmentName() + " UNselected" );
 		isFragmentSelected = false;
 	}
 
