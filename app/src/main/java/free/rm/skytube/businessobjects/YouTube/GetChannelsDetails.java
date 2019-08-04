@@ -140,6 +140,7 @@ public class GetChannelsDetails {
 						"nextPageToken")
 						.setKey(YouTubeAPIKey.get().getYouTubeAPIKey());
 
+                Logger.i(this, "YoutubeAPI call getYouTubeChannelFromUsername: " + channelInfo);
 		ChannelListResponse response = channelInfo.execute();
 		List<Channel> channelList = response.getItems();
 
@@ -218,6 +219,7 @@ public class GetChannelsDetails {
 		List<YouTubeChannel>    youTubeChannelList = new ArrayList<>();
 
 		try {
+	                Logger.i(this, "YoutubeAPI call getYouTubeChannels: %s - %s - %s", channelInfo, isUserSubscribed, shouldCheckForNewVideos);
 			// communicate with YouTube
 			ChannelListResponse response = channelInfo.execute();
 

@@ -66,6 +66,8 @@ public class GetFeaturedVideos extends GetYouTubeVideos {
 				videosList.setRegionCode(getPreferredRegion());
 
 				// communicate with YouTube
+	                            Logger.i(this, "YoutubeAPI call GetFeaturedVideos: " + videosList);
+
 				VideoListResponse response = videosList.execute();
 
 				// get videos
