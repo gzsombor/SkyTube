@@ -315,6 +315,7 @@ public class NewPipeService {
         SkyTubeApp.nonUiThread();
         LinkHandler url = streamingService.getStreamLHFactory().fromId(videoId);
         StreamExtractor extractor = streamingService.getStreamExtractor(url);
+        Logger.i(this, "getDetails for %s -> url", videoId, url);
         extractor.fetchPage();
 
         DateInfo uploadDate = new DateInfo(extractor.getUploadDate());
