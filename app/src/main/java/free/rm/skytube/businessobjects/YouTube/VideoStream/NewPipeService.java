@@ -196,6 +196,7 @@ public class NewPipeService {
     public YouTubeVideo getDetails(String videoId) throws ExtractionException, IOException {
         LinkHandler url = streamingService.getStreamLHFactory().fromId(videoId);
         StreamExtractor extractor = streamingService.getStreamExtractor(url);
+        Logger.i(this, "getDetails for %s -> url", videoId, url);
         extractor.fetchPage();
 
         String dateStr = extractor.getUploadDate();

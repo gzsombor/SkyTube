@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPI;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPIKey;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeCommentThread;
@@ -75,6 +76,7 @@ public class GetCommentThreads {
 				commentsList.setPageToken(nextPageToken);
 
 				// communicate with YouTube and get the comments
+				Logger.i(this, "YoutubeAPI call commentsList: " + commentsList);
 				CommentThreadListResponse response = commentsList.execute();
 				List<CommentThread> videoComments = response.getItems();
 
