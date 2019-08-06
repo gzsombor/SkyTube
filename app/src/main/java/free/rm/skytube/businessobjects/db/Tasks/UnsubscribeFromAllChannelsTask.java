@@ -22,7 +22,7 @@ public class UnsubscribeFromAllChannelsTask extends AsyncTaskParallel<YouTubeCha
 	@Override
 	protected Void doInBackground(YouTubeChannel... youTubeChannels) {
 		try {
-			List<YouTubeChannel> channelList = SubscriptionsDb.getSubscriptionsDb().getSubscribedChannels();
+			List<YouTubeChannel> channelList = SubscriptionsDb.getSubscriptionsDb().getSubscribedChannels(false);
 
 			for (final YouTubeChannel youTubeChannel : channelList) {
 				SubscriptionsDb.getSubscriptionsDb().unsubscribe(youTubeChannel);
