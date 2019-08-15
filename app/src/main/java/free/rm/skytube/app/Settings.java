@@ -46,7 +46,7 @@ public class Settings {
     }
 
     public boolean isDownloadToSeparateFolders() {
-	    return PreferenceManager.getDefaultSharedPreferences(app).getBoolean(app.getStr(R.string.pref_key_download_to_separate_directories),false);
+        return PreferenceManager.getDefaultSharedPreferences(app).getBoolean(app.getStr(R.string.pref_key_download_to_separate_directories),false);
     }
 
     public Policy getWarningMobilePolicy() {
