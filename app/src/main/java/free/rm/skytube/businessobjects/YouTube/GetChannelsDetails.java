@@ -29,6 +29,7 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.ChannelListResponse;
 
+import free.rm.skytube.app.Debug;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPI;
@@ -51,7 +52,7 @@ public class GetChannelsDetails {
 	}
 
 	public GetChannelsDetails(Map<String, YouTubeChannel> channelCache) {
-            Logger.i(this, "GetChannelsDetails cache:%s\n\t called by: %s", channelCache, caller());
+            Logger.i(this, "GetChannelsDetails cache:%s\n\t called by: %s", channelCache, Debug.caller());
 
 		this.channelCache = channelCache != null ? channelCache : new HashMap<String, YouTubeChannel>();
 	}
@@ -205,12 +206,6 @@ public class GetChannelsDetails {
 		return str.toString();
 	}
 
-	private static String caller() {
-        	StringWriter s = new StringWriter();
-        	new Exception("Stack trace").printStackTrace(new PrintWriter(s));
-        	return s.toString();
-	}
-
 	/**
 	 * Get the channels info from the remote YouTube server and then return a list of
 	 * {@link YouTubeChannel}.
@@ -228,7 +223,7 @@ public class GetChannelsDetails {
 		List<YouTubeChannel>    youTubeChannelList = new ArrayList<>();
 
 		try {
-	                Logger.i(this, "YoutubeAPI call getYouTubeChannels: %s - %s - %s \n\t called by: %s", channelInfo, isUserSubscribed, shouldCheckForNewVideos, caller());
+	                Logger.i(this, "YoutubeAPI call getYouTubeChannels: %s - %s - %s \n\t called by: %s", channelInfo, isUserSubscribed, shouldCheckForNewVideos, Debug.caller());
 			// communicate with YouTube
 			ChannelListResponse response = channelInfo.execute();
 
