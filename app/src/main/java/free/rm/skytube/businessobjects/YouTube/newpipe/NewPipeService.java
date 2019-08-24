@@ -190,7 +190,6 @@ public class NewPipeService {
         final CommentsExtractor commentsExtractor = streamingService.getCommentsExtractor(linkHandler);
         return new CommentPager(streamingService, commentsExtractor);
     }
-
     /**
      * Return detailed information for a channel from it's id.
      * @param channelId
@@ -267,7 +266,6 @@ public class NewPipeService {
     public YouTubeVideo getDetails(String videoId) throws ExtractionException, IOException {
         LinkHandler url = streamingService.getStreamLHFactory().fromId(videoId);
         StreamExtractor extractor = streamingService.getStreamExtractor(url);
-        Logger.i(this, "getDetails for %s -> url", videoId, url);
         extractor.fetchPage();
 
         DateInfo uploadDate = new DateInfo(extractor.getUploadDate());
@@ -347,6 +345,7 @@ public class NewPipeService {
     public VideoPager getSearchResult(String query) throws ExtractionException, IOException {
         SearchExtractor extractor = streamingService.getSearchExtractor(query);
         extractor.fetchPage();
+        Logger.i(this, "getSearchResult for %s -> %s", query, extractor.getOriginalUrl());
         return new VideoPager(streamingService, extractor, null);
     }
 
