@@ -68,6 +68,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import free.rm.skytube.R;
+import free.rm.skytube.app.Debug;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.enums.Policy;
@@ -163,6 +164,8 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		hideNavigationBar();
+		Debug.logCaller(this, "onCreateView");
+
 
 		playerViewGestureHandler = new PlayerViewGestureHandler(SkyTubeApp.getSettings());
 
@@ -252,6 +255,8 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	 */
 	private void initViews(View view) {
 		// setup the toolbar / actionbar
+		Debug.logCaller(this, "initViews");
+
 		Toolbar toolbar = view.findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -672,6 +677,8 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 	@Override
 	public void onDestroy() {
+		Debug.logCaller(this, "onDestroy");
+
 		super.onDestroy();
 		// stop the player from playing (when this fragment is going to be destroyed) and clean up
 		player.stop();
