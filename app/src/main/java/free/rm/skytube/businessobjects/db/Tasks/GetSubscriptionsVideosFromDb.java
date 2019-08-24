@@ -18,8 +18,10 @@
 package free.rm.skytube.businessobjects.db.Tasks;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.GetYouTubeVideos;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.SubscriptionsDb;
@@ -43,6 +45,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 	public synchronized List<YouTubeVideo> getNextVideos() {
 		if (!noMoreVideoPages()) {
 			List<YouTubeVideo> result = SubscriptionsDb.getSubscriptionsDb().getSubscriptionVideoPage(20, lastVideoId, lastVideoPublishTimestamp);
+			Logger.d(this, "getNextVideos [" + lastVideoId +", "+ new Date(lastVideoPublishTimestamp)+"] -> "+result.size());
 			if (result.isEmpty()) {
 				noMoreVideoPages = true;
 				lastVideoId = null;
@@ -51,7 +54,9 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 				lastVideoId = last.getId();
 				//lastVideoPublishTimestamp = last.getPublishDate().getValue();
 				lastVideoPublishTimestamp = last.getRetrievalTimestamp();//last.getPublishDate().getValue();
+				log(result);
 			}
+
 			return result;
 		}
 
@@ -59,8 +64,19 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 	}
 
 
+	private void log(List<YouTubeVideo> result) {
+	    StringBuilder b = new StringBuilder();
+	    for (int i = 0;i<result.size();i++) {
+	        YouTubeVideo video = result.get(i);
+	        b.append("[").append(i).append("] ").append(video.getId()).append(" - ").append(video.getPublishDate()).append(" - ").append(video.getTitle()).append("\n\t");
+	    }
+	    Logger.i(this, "Page:\n"+b);
+	}
+
+
 	@Override
 	public synchronized void reset() {
+		Logger.d(this, "reset [" + lastVideoId +", "+ new Date(lastVideoPublishTimestamp)+"]  ");
 		super.reset();
 		lastVideoId = null;
 		lastVideoPublishTimestamp = System.currentTimeMillis();
