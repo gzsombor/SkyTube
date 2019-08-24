@@ -179,7 +179,7 @@ public class NewPipeService {
     public YouTubeVideo getDetails(String videoId) throws ExtractionException, IOException {
         LinkHandler url = streamingService.getStreamLHFactory().fromId(videoId);
         StreamExtractor extractor = streamingService.getStreamExtractor(url);
-        Logger.i(this, "getDetails for %s -> url", videoId, url);
+        Logger.i(this, "getDetails for %s -> %s", videoId, url);
         extractor.fetchPage();
 
         String dateStr = extractor.getUploadDate();
@@ -209,7 +209,7 @@ public class NewPipeService {
 
     private String filterHtml(String htmlContent) {
         String result = Jsoup.clean(htmlContent, "", Whitelist.none(), new OutputSettings().prettyPrint(false));
-        Logger.d(this, "filterHtml %s -> %s", htmlContent, result);
+        // Logger.d(this, "filterHtml %s -> %s", htmlContent, result);
         return result;
     }
 
