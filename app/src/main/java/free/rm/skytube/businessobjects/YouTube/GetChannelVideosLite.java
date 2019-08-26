@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.util.Log;
+import free.rm.skytube.app.Debug;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPI;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPIKey;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
@@ -75,7 +76,7 @@ public class GetChannelVideosLite extends GetYouTubeVideos implements GetChannel
 		if (!noMoreVideoPages) {
 			try {
 				activitiesList.setPageToken(nextPageToken);
-				Log.i(TAG, "YoutubeAPI call:" + activitiesList);
+				Debug.logCaller(this, "YoutubeAPI call:" + activitiesList);
 				ActivityListResponse response = activitiesList.execute();
 				List<Activity> activityList = response.getItems();
 				if(activityList != null && activityList.size() > 0) {
