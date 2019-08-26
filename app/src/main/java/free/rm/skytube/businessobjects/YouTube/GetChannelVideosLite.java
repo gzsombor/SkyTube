@@ -26,6 +26,7 @@ import com.google.api.services.youtube.model.Activity;
 import com.google.api.services.youtube.model.ActivityListResponse;
 
 import android.util.Log;
+import free.rm.skytube.app.Debug;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPI;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPIKey;
@@ -71,7 +72,7 @@ public class GetChannelVideosLite extends GetYouTubeVideos implements GetChannel
 		if (!noMoreVideoPages) {
 			try {
 				activitiesList.setPageToken(nextPageToken);
-				Logger.i(this, "YoutubeAPI call:" + activitiesList);
+				Debug.logCaller(this, "YoutubeAPI call:" + activitiesList);
 				ActivityListResponse response = activitiesList.execute();
 				List<Activity> activityList = response.getItems();
 				if(activityList != null && activityList.size() > 0) {
