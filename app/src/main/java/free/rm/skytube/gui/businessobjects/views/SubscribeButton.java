@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import free.rm.skytube.R;
+import free.rm.skytube.app.Debug;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetBulkSubscriptionVideosTask;
 import free.rm.skytube.businessobjects.YouTube.Tasks.GetChannelVideosTask;
@@ -96,6 +97,7 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	public void setSubscribeState() {
 		setText(R.string.subscribe);
 		isUserSubscribed = false;	// the user is currently NOT subscribed
+		Debug.logCaller(this, "setSubscribe");
 	}
 
 
@@ -106,6 +108,7 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	public void setUnsubscribeState() {
 		setText(R.string.unsubscribe);
 		isUserSubscribed = true;
+		Debug.logCaller(this, "setUnsubscribe");
 	}
 
 }
