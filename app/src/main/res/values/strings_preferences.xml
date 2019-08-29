@@ -25,7 +25,15 @@
 		<item>@string/pref_official_player_value</item>   <!-- this should remain the last item -->
 	</string-array>
 
-	<string name="pref_category_mobile_network">Mobile Network</string>
+    <string name="pref_key_default_content_country" translatable="false">pref_key_default_content_country</string>
+    <string name="pref_title_default_content_country">Default content country</string>
+    <string name="pref_summary_default_content_country">Show content targetted for this country: %s</string>
+
+    <string name="pref_key_default_content_language" translatable="false">pref_key_default_content_language</string>
+    <string name="pref_title_default_content_language">Default content language</string>
+    <string name="pref_summary_default_content_language">Show content targetted for this language: %s</string>
+
+    <string name="pref_category_mobile_network">Mobile Network</string>
 	<string name="pref_title_preferred_res_mobile">Preferred Resolution for mobile network</string>
 	<string name="pref_key_preferred_res_mobile" translatable="false">pref_preferred_resolution_mobile</string>
 	<string name="pref_summary_preferred_res_mobile">Select your preferred resolution when streaming via a mobile network (such as 4G):  %s</string>
