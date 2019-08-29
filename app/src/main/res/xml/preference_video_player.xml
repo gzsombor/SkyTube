@@ -64,6 +64,14 @@
 		app:defaultValue=""
 		app:iconSpaceReserved="false" />
 
+	<ListPreference
+		app:key="@string/pref_key_default_content_language"
+		app:title="@string/pref_title_default_content_language"
+		app:summary="@string/pref_summary_default_content_language"
+		app:entries="@array/languages_names"
+		app:entryValues="@array/languages_iso639_codes"
+		app:defaultValue=""/>
+
 	<CheckBoxPreference
 		app:key="@string/pref_key_use_newer_formats"
 		app:title="@string/pref_key_use_newer_formats_title"
