@@ -50,4 +50,20 @@
 		android:summary="@string/pref_summary_enable_immersive_mode"
 		android:title="@string/pref_title_enable_immersive_mode" />
 
+	<ListPreference
+		android:key="@string/pref_key_default_content_country"
+		android:title="@string/pref_title_default_content_country"
+		android:summary="@string/pref_summary_default_content_country"
+		android:entries="@array/country_names"
+		android:entryValues="@array/country_codes"
+		android:defaultValue=""/>
+
+	<ListPreference
+		android:key="@string/pref_key_default_content_language"
+		android:title="@string/pref_title_default_content_language"
+		android:summary="@string/pref_summary_default_content_language"
+		android:entries="@array/languages_names"
+		android:entryValues="@array/languages_iso639_codes"
+		android:defaultValue=""/>
+
 </PreferenceScreen>
