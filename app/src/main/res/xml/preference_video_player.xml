@@ -58,4 +58,12 @@
 		app:entryValues="@array/country_codes"
 		app:defaultValue=""/>
 
+	<ListPreference
+		app:key="@string/pref_key_default_content_language"
+		app:title="@string/pref_title_default_content_language"
+		app:summary="@string/pref_summary_default_content_language"
+		app:entries="@array/languages_names"
+		app:entryValues="@array/languages_iso639_codes"
+		app:defaultValue=""/>
+
 </PreferenceScreen>
