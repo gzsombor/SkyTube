@@ -196,7 +196,7 @@ public class NewPipeService {
     public YouTubeVideo getDetails(String videoId) throws ExtractionException, IOException {
         LinkHandler url = streamingService.getStreamLHFactory().fromId(videoId);
         StreamExtractor extractor = streamingService.getStreamExtractor(url);
-        Logger.i(this, "getDetails for %s -> %s", videoId, url);
+        Logger.i(this, "getDetails for %s -> %s", videoId, url.getUrl());
         extractor.fetchPage();
 
         String dateStr = extractor.getUploadDate();
@@ -252,7 +252,7 @@ public class NewPipeService {
     public Pager<InfoItem> getSearchResult(String query) throws ExtractionException, IOException {
         SearchExtractor extractor = streamingService.getSearchExtractor(query);
         extractor.fetchPage();
-
+        Logger.i(this, "getSearchResult for %s -> %s", query, extractor.getOriginalUrl());
         return new Pager<>(streamingService, extractor, null);
     }
 
