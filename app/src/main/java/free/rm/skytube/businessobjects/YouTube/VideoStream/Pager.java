@@ -30,6 +30,7 @@ import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandlerFactory;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 
@@ -88,10 +89,13 @@ public class Pager<I extends InfoItem> {
 
     private List<YouTubeVideo> extract(InfoItemsPage<I> page) throws ParsingException {
         List<YouTubeVideo> result = new ArrayList<>(page.getItems().size());
+        Logger.i(this, "extract from %s, items: %s", page, page.getItems().size());
         LinkHandlerFactory linkHandlerFactory = streamingService.getStreamLHFactory();
         for (I infoItem : page.getItems()) {
             if (infoItem instanceof StreamInfoItem) {
                 result.add(convert((StreamInfoItem) infoItem, linkHandlerFactory));
+            } else {
+                Logger.i(this, "Unexpected item %s, type:%s", infoItem, infoItem.getClass());
             }
         }
         return result;
