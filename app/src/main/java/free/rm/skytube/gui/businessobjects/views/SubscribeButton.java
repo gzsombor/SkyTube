@@ -97,7 +97,6 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	public void setSubscribeState() {
 		setText(R.string.subscribe);
 		isUserSubscribed = false;	// the user is currently NOT subscribed
-		Debug.logCaller(this, "setSubscribe");
 	}
 
 
@@ -108,7 +107,6 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	public void setUnsubscribeState() {
 		setText(R.string.unsubscribe);
 		isUserSubscribed = true;
-		Debug.logCaller(this, "setUnsubscribe");
 	}
 
 }
