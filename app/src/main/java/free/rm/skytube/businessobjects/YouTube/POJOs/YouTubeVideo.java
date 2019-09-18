@@ -155,6 +155,11 @@ public class YouTubeVideo implements Serializable {
 	 * Set to true if the video is a current live stream.
 	 */
 	private boolean isLiveStream;
+
+	/**
+	 * Timestamp of the data retrieval.
+	 */
+	private Long retrievalTimestamp;
 	
 	/** publishDate will remain valid for 1 hour. */
 	private final static long PUBLISH_DATE_VALIDITY_TIME = 60 * 60 * 1000L;
@@ -583,6 +588,13 @@ public class YouTubeVideo implements Serializable {
 		getDesiredStream(listener, false);
 	}
 
+	public Long getRetrievalTimestamp() {
+		return retrievalTimestamp;
+	}
+
+	public void setRetrievalTimestamp(Long retrievalTimestamp) {
+		this.retrievalTimestamp = retrievalTimestamp;
+	}
 
 	/**
 	 * Remove local copy of this video, and delete it from the VideoDownloads DB.
