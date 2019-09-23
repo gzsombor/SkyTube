@@ -8,9 +8,10 @@ import free.rm.skytube.businessobjects.Logger;
 public class Debug {
 
     public static String caller() {
-	StringWriter s = new StringWriter();
-	new Exception("Stack trace").printStackTrace(new PrintWriter(s));
-	return s.toString();
+        return "";
+//	StringWriter s = new StringWriter();
+//	new Exception("Stack trace").printStackTrace(new PrintWriter(s));
+//	return s.toString();
     }
 
     public static void logCaller(Object obj) {
