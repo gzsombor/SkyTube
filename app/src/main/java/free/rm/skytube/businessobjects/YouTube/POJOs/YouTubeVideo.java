@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.Toast;
 
@@ -284,6 +285,7 @@ public class YouTubeVideo implements Serializable {
 		this.likeCountNumber = likedCountInt;
 		this.dislikeCountNumber = dislikedCountInt;
 		this.thumbsUpPercentageStr = fullPercentageStr;
+		// Log.i("YouTubeVideo", "setLikeDislikeCount for "+id+" : "+likedCountInt +','+dislikedCountInt + " -> "+thumbsUpPercentageStr + "("+thumbsUpPercentage+")"+likeCountNumber+" "+dislikeCountNumber);
 	}
 
 	/**
