@@ -54,7 +54,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 				lastVideoId = last.getId();
 				//lastVideoPublishTimestamp = last.getPublishDate().getValue();
 				lastVideoPublishTimestamp = last.getRetrievalTimestamp();//last.getPublishDate().getValue();
-				log(result);
+				// log(result);
 			}
 
 			return result;
@@ -68,7 +68,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 	    StringBuilder b = new StringBuilder();
 	    for (int i = 0;i<result.size();i++) {
 	        YouTubeVideo video = result.get(i);
-	        b.append("[").append(i).append("] ").append(video.getId()).append(" - ").append(video.getPublishDate()).append(" - ").append(video.getTitle()).append("\n\t");
+	        b.append("[").append(i).append("] ").append(video.getId()).append(" - ").append(video.getPublishDate()).append(" - ").append(video.getRetrievalTimestamp() != null ? new Date(video.getRetrievalTimestamp()) : null).append(" - ").append(video.getTitle()).append("\n\t");
 	    }
 	    Logger.i(this, "Page:\n"+b);
 	}
