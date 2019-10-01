@@ -43,6 +43,7 @@ import org.joda.time.format.PeriodFormatter;
 import java.io.File;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -606,8 +607,10 @@ public class YouTubeVideo implements Serializable {
 	 */
 	public void removeDownload() {
 		Uri uri = DownloadedVideosDb.getVideoDownloadsDb().getVideoFileUri(YouTubeVideo.this);
+		Log.i("YouTubeVideo", "removeDownload for " + id + " : " + title + " -> " + uri);
 		File file = new File(uri.getPath());
 		if (file.exists()) {
+			Log.i("YouTubeVideo", "File exists " + file.getAbsolutePath());
 			file.delete();
 		}
 		if (SkyTubeApp.getSettings().isDownloadToSeparateFolders()) {
@@ -618,15 +621,19 @@ public class YouTubeVideo implements Serializable {
 
 	private void removeParentFolderIfEmpty(File file) {
 		File parentFile = file.getParentFile();
+		Log.i("YouTubeVideo", "removeParentFolderIfEmpty " + file.getAbsolutePath() + " -> " + parentFile.getAbsolutePath() + " "+parentFile.exists() + " "+ parentFile.isDirectory());
 		if (parentFile.exists() && parentFile.isDirectory()) {
 			String[] fileList = parentFile.list();
+			Log.i("YouTubeVideo", "file list is " + Arrays.asList(fileList));
 			if (fileList != null) {
 				if (fileList.length == 0) {
 					// that was the last file in the directory, remove it
+					Log.i("YouTubeVideo", "now delete it:" + parentFile);
 					parentFile.delete();
 				}
 			}
 		}
+		Log.i("YouTubeVideo", "exit removeParentFolderIfEmpty");
 	}
 
 
