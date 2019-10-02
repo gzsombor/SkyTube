@@ -19,6 +19,9 @@ package free.rm.skytube.app;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.StringRes;
+
 import free.rm.skytube.R;
 import free.rm.skytube.app.enums.Policy;
 
@@ -43,16 +46,34 @@ public class Settings {
         return PreferenceManager.getDefaultSharedPreferences(app).getBoolean(app.getStr(R.string.pref_key_download_to_separate_directories),false);
     }
 
+    public boolean isDownloadToTemporaryFolder() {
+        return PreferenceManager.getDefaultSharedPreferences(app).getBoolean(app.getStr(R.string.pref_key_download_to_temporary_directory),false);
+    }
+
     public Policy getWarningMobilePolicy() {
-        String currentValue = PreferenceManager.getDefaultSharedPreferences(app).getString(getStr(R.string.pref_key_mobile_network_usage_policy),
-                getStr(R.string.pref_mobile_network_usage_value_ask));
+        String currentValue = getPreference(R.string.pref_key_mobile_network_usage_policy, getStr(R.string.pref_mobile_network_usage_value_ask));
         return Policy.valueOf(currentValue.toUpperCase());
     }
 
     public void setWarningMobilePolicy(Policy warnPolicy) {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(app).edit();
-        editor.putString(getStr(R.string.pref_key_mobile_network_usage_policy), warnPolicy.name().toLowerCase());
-        editor.commit();
+        setPreference(R.string.pref_key_mobile_network_usage_policy, warnPolicy.name().toLowerCase());
     }
 
+    public void setDownloadFolder(String dir) {
+        setPreference(R.string.pref_key_video_download_folder, dir);
+    }
+
+    public String getDownloadFolder(String defaultValue) {
+        return getPreference(R.string.pref_key_video_download_folder, defaultValue);
+    }
+
+    private void setPreference(@StringRes int resId, String value) {
+        final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(app).edit();
+        editor.putString(getStr(resId), value);
+        editor.apply();
+    }
+
+    private String getPreference(@StringRes int resId, String defaultValue) {
+        return PreferenceManager.getDefaultSharedPreferences(app).getString(app.getStr(resId), defaultValue);
+    }
 }
