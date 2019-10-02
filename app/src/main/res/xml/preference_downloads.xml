@@ -29,6 +29,12 @@
             app:summary="@string/pref_summary_download_to_separate_directories"
             app:iconSpaceReserved="false" />
 
+        <CheckBoxPreference
+            app:defaultValue="false"
+            app:key="@string/pref_key_download_to_temporary_directory"
+            app:title="@string/pref_title_download_to_temporary_directory"
+            app:summary="@string/pref_summary_download_to_temporary_directory"/>
+
         <Preference
             app:title="@string/pref_title_video_download_folder"
             app:key="@string/pref_key_video_download_folder"
