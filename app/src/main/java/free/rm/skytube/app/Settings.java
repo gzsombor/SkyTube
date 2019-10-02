@@ -110,6 +110,10 @@ public class Settings {
         return !getPreference(R.string.pref_key_disable_playback_status, false);
     }
 
+    public boolean isDownloadToTemporaryFolder() {
+        return getSharedPreferences().getBoolean(app.getStr(R.string.pref_key_download_to_temporary_directory),false);
+    }
+
     /**
      * Gets the policy which defines the desired video resolution by the user in the app preferences.
      *
