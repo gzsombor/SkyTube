@@ -26,14 +26,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.channels.FileChannel;
 import java.util.regex.Pattern;
 
-import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.gui.activities.PermissionsActivity;
 
@@ -45,7 +49,7 @@ import static free.rm.skytube.app.SkyTubeApp.getContext;
 public abstract class FileDownloader implements Serializable, PermissionsActivity.PermissionsTask {
 
 	/** The remote file URL that is going to be downloaded. */
-	private String  remoteFileUrl = null;
+	private String remoteFileUrl = null;
 	/** The directory type:  e.g. Environment.DIRECTORY_MOVIES or Environment.DIRECTORY_PICTURES */
 	private String  dirType = null;
 	/** The title that will be displayed by the Android's download manager. */
@@ -65,6 +69,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 
 	private long    downloadId;
 	private transient BroadcastReceiver onComplete;
+	private FileInformation fileInformation;
 
 	private Pattern invalidCharacters = Pattern.compile("[^\\w\\d]+");
 
@@ -101,14 +106,14 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 			return;
 		}
 
-		Uri     remoteFileUri = Uri.parse(remoteFileUrl);
-		String  downloadFileName = getCompleteFileName(remoteFileUri);
-		FileInformation fileInformation = new FileInformation(downloadFileName);
+		Uri remoteFileUri = Uri.parse(remoteFileUrl);
+		String  downloadFileName = getCompleteFileName();
+		fileInformation = new FileInformation(downloadFileName, outputDirectoryName, parentDirectory, dirType);
 		String fullDownloadFileName = fileInformation.getFullDownloadFileName();
 		final File downloadDestinationFile = fileInformation.getFile();
 
 
-		Logger.w(this, "Downloading video %s into %s -> %s", outputFileName, outputDirectoryName, downloadDestinationFile.getAbsolutePath());
+		Logger.w(this, "Downloading video %s into %s -> %s (temp: %s)", outputFileName, outputDirectoryName, downloadDestinationFile.getAbsolutePath(), fileInformation.getTemporaryFile());
 		if (downloadDestinationFile.exists()) {
 			onFileDownloadCompleted(true, Uri.parse(downloadDestinationFile.toURI().toString()));
 			return;
@@ -120,12 +125,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 				.setDescription(description)
 				.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
-		String videoDir = SkyTubeApp.getSettings().getDownloadFolder(null);
-		if(videoDir != null) {
-			request.setDestinationUri(Uri.fromFile(new File(videoDir, fullDownloadFileName)));
-		} else {
-			request.setDestinationInExternalPublicDir(dirType, fullDownloadFileName);
-		}
+		request.setDestinationUri(Uri.fromFile(fileInformation.getDownloadDestinationFile()));
 
 		if (!allowedOverRoaming) {
 			request.setAllowedNetworkTypes(allowedNetworkTypesFlags);
@@ -159,7 +159,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 
 					// check the referenceId for this download
 					if (referenceId == downloadId) {
-						fileDownloadStatus();
+						fileDownloadStatus(context);
 					}
 				}
 			}
@@ -181,8 +181,8 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	/**
 	 * Concatenates the outputFileName together with the appropriate file extension.
 	 */
-	private String getCompleteFileName(Uri remoteFileUri) {
-		String fileExt = (outputFileExtension != null)  ?  outputFileExtension  :   MimeTypeMap.getFileExtensionFromUrl(remoteFileUri.toString());
+	private String getCompleteFileName() {
+		String fileExt = (outputFileExtension != null)  ?  outputFileExtension  :   MimeTypeMap.getFileExtensionFromUrl(remoteFileUrl);
 		return outputFileName + "." + fileExt;
 	}
 
@@ -190,7 +190,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	/**
 	 * Notify the user whether the download was successful or not.
 	 */
-	private void fileDownloadStatus() {
+	private void fileDownloadStatus(Context context) {
 		boolean downloadSuccessful = false;
 		Uri downloadedFileUri  = null;
 		Cursor cursor = ContextCompat.getSystemService(getContext(), DownloadManager.class)
@@ -208,6 +208,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 
 				// output why the download has failed...
 				Logger.e(this, "Download failed.  Reason=%s", reason);
+				Toast.makeText(context, "Download failed, reasone: " + reason, Toast.LENGTH_LONG).show();
 			}
 
 			cursor.close();
@@ -216,9 +217,51 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 		getContext().unregisterReceiver(onComplete);
 
 		// file download is now completed
-		onFileDownloadCompleted(downloadSuccessful, downloadedFileUri);
+		if (downloadSuccessful && fileInformation.getTemporaryFile() != null) {
+			try {
+				Logger.i(this, "Downloaded into temporary file %s, moving to %s", fileInformation.getTemporaryFile().getCanonicalPath(), fileInformation.getFile().getCanonicalPath());
+			} catch (IOException e) {
+				Logger.e(this, "Error: "+e.getMessage(), e);
+			}
+			try {
+				move(fileInformation.getTemporaryFile(), fileInformation.getFile());
+				onFileDownloadCompleted(downloadSuccessful, Uri.fromFile(fileInformation.getFile()));
+			} catch(IOException e) {
+				Logger.e(this, "Failed to move file from "+ fileInformation.getTemporaryFile()+ " -> "+fileInformation.getFile() + " : " + e.getMessage(),e);
+				onFileDownloadCompleted(downloadSuccessful, downloadedFileUri);
+			}
+		} else {
+			onFileDownloadCompleted(downloadSuccessful, downloadedFileUri);
+		}
 	}
 
+	private void move(File from, File destination) throws IOException{
+		final File parentDir = destination.getParentFile();
+		if (!parentDir.exists()) {
+			Logger.e(this, "Directory doesn't exists, try to create: "+ parentDir);
+			if (parentDir.mkdirs()) {
+				Logger.e(this, "Destination now exists:"+ parentDir.exists());
+			} else {
+				Logger.e(this, "Failed to create directory:"+ parentDir +" exists:"+ parentDir.exists());
+			}
+		} else {
+			Logger.e(this, "directory exists "+ parentDir.getCanonicalPath());
+		}
+		if (!from.renameTo(destination)) {
+			FileChannel outputChannel = null;
+			FileChannel inputChannel = null;
+			try {
+				outputChannel = new FileOutputStream(destination).getChannel();
+				inputChannel = new FileInputStream(from).getChannel();
+				inputChannel.transferTo(0, inputChannel.size(), outputChannel);
+				inputChannel.close();
+				from.delete();
+			} finally {
+				if (inputChannel != null) inputChannel.close();
+				if (outputChannel != null) outputChannel.close();
+			}
+		}
+	}
 
 	public FileDownloader setRemoteFileUrl(String remoteFileUrl) {
 		this.remoteFileUrl = remoteFileUrl;
@@ -253,6 +296,9 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	public FileDownloader setOutputFileName(String outputFileName) {
 		// replace all the special characters with space.
 		this.outputFileName = invalidCharacters.matcher(outputFileName).replaceAll(" ").trim();
+		if (this.outputFileName.length() > 50) {
+			this.outputFileName = this.outputFileName.substring(0,49).trim();
+		}
 		return this;
 	}
 
@@ -325,14 +371,17 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	 */
 	public abstract void onExternalStorageNotAvailable();
 
-	private class FileInformation {
+	private static class FileInformation implements Serializable {
 		private final String fullDownloadFileName;
 		private final File file;
+		private final File temporaryFile;
 
-		public FileInformation(String downloadFileName) {
+		public FileInformation(String downloadFileName, String  outputDirectoryName,
+				String parentDirectory, String dirType) {
 			// if there's already a local file for this video for some reason, then do not redownload the
 			// file and halt
-			File parentDir = parentDirectory != null ? new File(parentDirectory) : Environment.getExternalStoragePublicDirectory(dirType);
+			final File externalStorageDir = Environment.getExternalStoragePublicDirectory(dirType);
+			File parentDir = parentDirectory != null ? new File(parentDirectory) : externalStorageDir;
 			boolean toDirectories = SkyTubeApp.getSettings().isDownloadToSeparateFolders();
 
 			if (toDirectories && outputDirectoryName != null && !outputDirectoryName.isEmpty()) {
@@ -344,6 +393,12 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 			} else {
 				fullDownloadFileName = downloadFileName;
 			}
+			boolean useTempDir = SkyTubeApp.getSettings().isDownloadToTemporaryFolder();
+			if (useTempDir && !externalStorageDir.equals(parentDir)) {
+				temporaryFile = new File(externalStorageDir, downloadFileName);
+			}  else {
+				temporaryFile = null;
+			}
 			file = new File(parentDir, downloadFileName);
 		}
 
@@ -353,6 +408,14 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 
 		public File getFile() {
 			return file;
+		}
+
+		public File getTemporaryFile() {
+			return temporaryFile;
+		}
+
+		public File getDownloadDestinationFile() {
+			return temporaryFile != null ? temporaryFile : file;
 		}
 	}
 }
