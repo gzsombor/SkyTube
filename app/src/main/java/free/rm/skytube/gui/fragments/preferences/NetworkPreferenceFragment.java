@@ -21,7 +21,6 @@ public class NetworkPreferenceFragment extends PreferenceFragmentCompat {
         addPreferencesFromResource(R.xml.preference_downloads);
 
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final SharedPreferences.Editor editor = pref.edit();
 
         final Preference folderChooser = findPreference(getString(R.string.pref_key_video_download_folder));
         folderChooser.setOnPreferenceClickListener(preference -> {
