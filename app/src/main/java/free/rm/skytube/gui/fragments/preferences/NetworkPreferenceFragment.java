@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import free.rm.skytube.R;
+import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.YouTube.VideoStream.VideoResolution;
 
 public class NetworkPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -21,7 +22,6 @@ public class NetworkPreferenceFragment extends PreferenceFragment implements Sha
         addPreferencesFromResource(R.xml.preference_downloads);
 
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final SharedPreferences.Editor editor = pref.edit();
 
         final Preference folderChooser = findPreference(getString(R.string.pref_key_video_download_folder));
         folderChooser.setOnPreferenceClickListener(preference -> {
@@ -32,15 +32,14 @@ public class NetworkPreferenceFragment extends PreferenceFragment implements Sha
                     .withResources(R.string.pref_popup_title_video_download_folder, R.string.ok, R.string.cancel)
                     .withChosenListener((dir, dirFile) -> {
 
-                        editor.putString(getString(R.string.pref_key_video_download_folder), dir);
-                        editor.apply();
+                        SkyTubeApp.getSettings().setDownloadFolder(dir);
                         folderChooser.setSummary(getString(R.string.pref_summary_video_download_folder, dir));
                     })
                     .build()
                     .show();
             return true;
         });
-        String dir = pref.getString(getString(R.string.pref_key_video_download_folder), null);
+        String dir = SkyTubeApp.getSettings().getDownloadFolder(null);
         folderChooser.setSummary(getString(R.string.pref_summary_video_download_folder, dir != null ? dir : Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)));
 
         ListPreference videoResolutionPref = (ListPreference)findPreference(getString(R.string.pref_key_video_download_preferred_resolution));
@@ -63,13 +62,12 @@ public class NetworkPreferenceFragment extends PreferenceFragment implements Sha
             }
         }
     }
-            @Override
+
+    @Override
     public void onResume() {
         super.onResume();
         getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
-
-
 
     @Override
     public void onPause() {
