@@ -584,7 +584,7 @@ public class YouTubeVideo extends CardData implements Serializable {
 							.setDescription(getStr(R.string.video) + " ― " + getChannelName())
 							.setOutputFileName(getId() + " - " + getTitle())
 							.setOutputDirectoryName(getChannelName())
-							.setParentDirectory(SkyTubeApp.getPreferenceManager().getString(SkyTubeApp.getStr(R.string.pref_key_video_download_folder), null))
+							.setParentDirectory(SkyTubeApp.getSettings().getDownloadFolder(null))
 							.setOutputFileExtension("mp4")
 							.setAllowedOverRoaming(false)
 							.setAllowedNetworkTypesFlags(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
