@@ -51,9 +51,13 @@ public class Settings {
         return getPreference(R.string.pref_key_download_to_separate_directories,false);
     }
 
+
+    public boolean isDownloadToTemporaryFolder() {
+        return getSharedPreferences().getBoolean(app.getStr(R.string.pref_key_download_to_temporary_directory),false);
+    }
+
     public Policy getWarningMobilePolicy() {
-        String currentValue = getSharedPreferences().getString(getStr(R.string.pref_key_mobile_network_usage_policy),
-                getStr(R.string.pref_mobile_network_usage_value_ask));
+        String currentValue = getPreference(R.string.pref_key_mobile_network_usage_policy, getStr(R.string.pref_mobile_network_usage_value_ask));
         return Policy.valueOf(currentValue.toUpperCase());
     }
 
