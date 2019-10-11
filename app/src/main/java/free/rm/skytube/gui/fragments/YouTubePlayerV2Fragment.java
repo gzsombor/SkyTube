@@ -250,22 +250,8 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		playerView.setOnTouchListener(playerViewGestureHandler);
 		playerView.requestFocus();
 
-		player = createExoPlayer();
-		player.addListener(new Player.DefaultEventListener() {
-			@Override
-			public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-				Logger.i(this, ">> onPlayerStateChanged " + playWhenReady + " state="+playbackState);
-				if (playbackState == Player.STATE_READY && playWhenReady) {
-					preventDeviceSleeping(true);
-				} else {
-					preventDeviceSleeping(false);
-				}
-			}
-		});
-		player.setPlayWhenReady(true);
+		setupPlayer();
 		playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);               // ensure that videos are played in their correct aspect ratio
-		player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);    // ensure that videos are played in their correct aspect ratio
-		playerView.setPlayer(player);
 
 		loadingVideoView = view.findViewById(R.id.loadingVideoView);
 
@@ -296,6 +282,26 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				commentsAdapter = new CommentsAdapter(getActivity(), youTubeVideo.getId(), commentsExpandableListView, commentsProgressBar, noVideoCommentsView);
 			}
 		});
+	}
+
+	private synchronized void setupPlayer() {
+		if (playerView.getPlayer() == null) {
+			player = createExoPlayer();
+			player.addListener(new Player.EventListener() {
+				@Override
+				public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+					Logger.i(this, ">> onPlayerStateChanged " + playWhenReady + " state=" + playbackState);
+					if (playbackState == Player.STATE_READY && playWhenReady) {
+						preventDeviceSleeping(true);
+					} else {
+						preventDeviceSleeping(false);
+					}
+				}
+			});
+			player.setPlayWhenReady(true);
+			player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);    // ensure that videos are played in their correct aspect ratio
+			playerView.setPlayer(player);
+		}
 	}
 
 	private SimpleExoPlayer createExoPlayer() {
@@ -604,7 +610,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	@Override
 	public void videoPlaybackStopped() {
 		player.stop();
-		playerView.setPlayer(null);
+		// playerView.setPlayer(null);
 		if(!SkyTubeApp.getPreferenceManager().getBoolean(getString(R.string.pref_key_disable_playback_status), false)) {
 			PlaybackStatusDb.getPlaybackStatusDb().setVideoPosition(youTubeVideo, player.getCurrentPosition());
 		}
@@ -618,6 +624,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		super.onDestroy();
 		// stop the player from playing (when this fragment is going to be destroyed) and clean up
 		player.stop();
+		player.release();
 		player = null;
 		playerView.setPlayer(null);
 	}
