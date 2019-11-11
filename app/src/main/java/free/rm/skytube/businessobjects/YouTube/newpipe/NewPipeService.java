@@ -131,7 +131,6 @@ public class NewPipeService {
         final CommentsExtractor commentsExtractor = streamingService.getCommentsExtractor(linkHandler);
         return new CommentPager(streamingService, commentsExtractor);
     }
-
     /**
      * Return detailed information for a channel from it's id.
      * @param channelId
