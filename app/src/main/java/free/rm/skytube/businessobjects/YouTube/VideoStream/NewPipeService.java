@@ -30,6 +30,8 @@ import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.ServiceList;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.channel.ChannelExtractor;
+import org.schabi.newpipe.extractor.comments.CommentsExtractor;
+import org.schabi.newpipe.extractor.comments.CommentsInfoItem;
 import org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
@@ -125,6 +127,11 @@ public class NewPipeService {
         return new Pager<>(streamingService, channelExtractor, channel);
     }
 
+    public Pager<CommentsInfoItem> getCommentPager(String videoId) throws ExtractionException {
+        final ListLinkHandler linkHandler = streamingService.getCommentsLHFactory().fromId(videoId);
+        final CommentsExtractor commentsExtractor = streamingService.getCommentsExtractor(linkHandler);
+        return new Pager<>(streamingService, commentsExtractor, null);
+    }
     /**
      * Return detailed information for a channel from it's id.
      * @param channelId
