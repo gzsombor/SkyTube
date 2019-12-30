@@ -84,15 +84,15 @@
 	<string name="pref_summary_hide_tabs">Choose which tabs should not be shown. Restart required.</string>
 	<string name="pref_hide_tabs_restart">Restart app to show updated tabs.</string>
 	<string name="pref_title_feed_notification">Feed Auto Notification</string>
-	<string name="pref_summary_feed_notification">How often to check for new videos from subscribed channels: %s</string>
+	<string name="pref_summary_feed_notification">Milyen gyakran keressen új videókat a feliratkozott csatornákon: %s</string>
 	<string-array name="feed_notification">
-		<item>Off</item>
-		<item>6 Hours</item>
-		<item>12 Hours</item>
-		<item>24 Hours</item>
+		<item>Kikapcsolva</item>
+		<item>6 óránként</item>
+		<item>12 óránként</item>
+		<item>24 óránként</item>
 	</string-array>
 	<!-- Notification values are in milliseconds -->
-	<string name="pref_title_screen_orientation">Screen Orientation</string>
+	<string name="pref_title_screen_orientation">Képernyőforgatás</string>
 	<string name="pref_summary_screen_orientation">Video player\'s orientation:  %s</string>
 	<string-array name="screen_orientations">
 		<item>Automatic</item>
