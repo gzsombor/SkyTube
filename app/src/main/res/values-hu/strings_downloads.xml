@@ -7,7 +7,7 @@
 	<string name="download_video">Videó Letöltés</string>
 	<string name="starting_video_download">\'%s\' letöltése …</string>
 	<string name="video_download_stream_error">Nem lehet letölteni \'%s\'-t.</string>
-	<string name="delete_download">Delete Download</string>
+	<string name="delete_download">Letöltés Törlése</string>
 	<string name="video_downloaded">\'%s\' le lett töltve.</string>
 	<string name="no_downloaded_videos_text">Még nem töltött le egyetlen videót sem.
 \n
