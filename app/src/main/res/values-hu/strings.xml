@@ -8,7 +8,7 @@
 	<string name="error">Hiba</string>
 	<string name="ok">Rendben</string>
 	<string name="search_videos">Videók keresése</string>
-	<string name="launch_offical_player_error">Hiba történt a hivatalos Youtube lejátszó betöltése közben. Ellenőrizze, hogy megtalálható-e az eszközén.</string>
+	<string name="launch_offical_player_error">Hiba történt a hivatalos YouTube lejátszó betöltése közben. Ellenőrizze, hogy megtalálható-e az eszközén.</string>
 	<string name="LIVE">ÉLŐ</string>
 	<string name="featured">Kiemelt</string>
 	<string name="most_popular">Legnépszerűbb</string>
