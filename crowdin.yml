@@ -1,0 +1,14 @@
+files:
+  - source: /app/src/main/res/values/*.xml
+    ignore:
+      - attrs.xml
+      - dimens.xml
+      - colors.xml
+      - integers.xml
+      - styles.xml
+    translation: /app/src/main/res/values-%two_letters_code%/%original_file_name%
+  - source: /app/src/extra/res/values/*.xml
+    ignore:
+      - dimens.xml
+      - styles.xml
+    translation: /app/src/extra/res/values-%two_letters_code%/%original_file_name%
