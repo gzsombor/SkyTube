@@ -62,6 +62,18 @@
 				drawer:layout_constraintTop_toTopOf="parent"
 				tools:text="1.0x" />
 
+<!--		<TextView
+				android:id="@+id/videoQuality"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="70dp"
+				android:layout_marginEnd="8dp"
+				android:layout_marginRight="8dp"
+				android:text="Quality"
+				android:textColor="@android:color/white"
+				android:textSize="20sp"
+				drawer:layout_constraintEnd_toStartOf="@+id/playbackSpeed"
+				drawer:layout_constraintTop_toTopOf="parent" />-->
 		</androidx.constraintlayout.widget.ConstraintLayout>
 
 	</FrameLayout>
