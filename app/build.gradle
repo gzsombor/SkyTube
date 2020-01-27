@@ -100,7 +100,7 @@ dependencies {
     // implementation 'com.github.gzsombor.NewPipeExtractor:extractor:d1e297051a'
 
     // other modules
-    implementation group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.2.Final'
+    implementation group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.3.Final'
     implementation 'com.github.moraisigor:slidingdrawer:1.7.1'
     implementation 'com.github.bumptech.glide:glide:4.10.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
