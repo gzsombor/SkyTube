@@ -13,7 +13,7 @@ android {
         versionCode buildNumber.toInteger()
 
         // Third party devs:  pls be ethical and change the below keys
-        buildConfigField 'String',   'YOUTUBE_API_KEYS_DEBUG', '"AIzaSyDU-ZZCyOB_kYkiMSZ6ooSipUZRukHU4ik"'
+        buildConfigField 'String',   'YOUTUBE_API_KEYS_DEBUG', '"AIzaSyC2r3UUbTzHf-iUqMrVc5TI6MMnQ_geDXs"'
         buildConfigField 'String[]', 'YOUTUBE_API_KEYS',
                 '{' +
                         '"AIzaSyDR7X3W95oAJRaAmKxP9H0c7B3Q82r2iz8",' +
