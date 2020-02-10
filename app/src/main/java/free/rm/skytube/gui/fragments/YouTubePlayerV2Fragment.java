@@ -229,7 +229,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 			// will now check if the video is bookmarked or not (and then update the menu
 			// accordingly)
-			new IsVideoBookmarkedTask(youTubeVideo, menu).executeInParallel();
+			new IsVideoBookmarkedTask(youTubeVideo.getId(), menu).executeInParallel();
 		}
 	}
 
@@ -349,7 +349,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 			videoDescRatingsDisabledTextView.setVisibility(View.VISIBLE);
 		}
 
-        new ResumeVideoTask(getContext(), youTubeVideo, position -> {
+        new ResumeVideoTask(getContext(), youTubeVideo.getId(), position -> {
 			playerInitialPosition = position;
 			YouTubePlayerV2Fragment.this.loadVideo();
 		}).ask();
@@ -523,7 +523,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		// youTubeVideo might be null if we have only passed the video URL to this fragment (i.e.
 		// the app is still trying to construct youTubeVideo in the background).
 		if (youTubeVideo != null)
-			new IsVideoBookmarkedTask(youTubeVideo, menu).executeInParallel();
+			new IsVideoBookmarkedTask(youTubeVideo.getId(), menu).executeInParallel();
 	}
 
 
