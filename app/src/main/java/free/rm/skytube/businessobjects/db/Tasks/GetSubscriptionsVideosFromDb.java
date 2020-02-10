@@ -18,11 +18,13 @@
 package free.rm.skytube.businessobjects.db.Tasks;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.GetYouTubeVideos;
+import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.SubscriptionsDb;
 
@@ -42,7 +44,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 
 
 	@Override
-	public synchronized List<YouTubeVideo> getNextVideos() {
+	public synchronized List<CardData> getNextVideos() {
 		if (!noMoreVideoPages()) {
 			List<YouTubeVideo> result = SubscriptionsDb.getSubscriptionsDb().getSubscriptionVideoPage(20, lastVideoId, lastVideoPublishTimestamp);
 			Logger.d(this, "getNextVideos [" + lastVideoId +", "+ new Date(lastVideoPublishTimestamp)+"] -> "+result.size());
@@ -57,7 +59,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 				// log(result);
 			}
 
-			return result;
+			return new ArrayList<>(result);
 		}
 
 		return null;
