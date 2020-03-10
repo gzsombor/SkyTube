@@ -43,6 +43,11 @@ public class NetworkPreferenceFragment extends PreferenceFragmentCompat {
         VideoResolution.setupListPreferences ((ListPreference) findPreference(getString(R.string.pref_key_video_download_maximum_resolution)));
         VideoResolution.setupListPreferences ((ListPreference) findPreference(getString(R.string.pref_key_video_download_minimum_resolution)));
 
+        findPreference(getString(R.string.pref_key_download_to_external_storage)).setOnPreferenceChangeListener((preference, newValue) -> {
+            folderChooser.setEnabled(!(boolean) newValue);
+            return true;
+        });
+
         // set up the list of available video resolutions on mobile network
         VideoResolution.setupListPreferences ((ListPreference) findPreference(getString(R.string.pref_key_maximum_res_mobile)));
         VideoResolution.setupListPreferences ((ListPreference) findPreference(getString(R.string.pref_key_minimum_res_mobile)));
