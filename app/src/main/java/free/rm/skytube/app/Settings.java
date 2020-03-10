@@ -110,6 +110,10 @@ public class Settings {
         return !getPreference(R.string.pref_key_disable_playback_status, false);
     }
 
+    public boolean isDownloadToExternalStorage() {
+        return getSharedPreferences().getBoolean(app.getStr(R.string.pref_key_download_to_external_storage),false);
+    }
+
     public boolean isDownloadToTemporaryFolder() {
         return getSharedPreferences().getBoolean(app.getStr(R.string.pref_key_download_to_temporary_directory),false);
     }
@@ -215,7 +219,11 @@ public class Settings {
     }
 
     public String getDownloadFolder(String defaultValue) {
-        return getPreference(R.string.pref_key_video_download_folder, defaultValue);
+        if (isDownloadToExternalStorage()) {
+            return null;
+        } else {
+            return getPreference(R.string.pref_key_video_download_folder, defaultValue);
+        }
     }
 
     public File getDownloadParentFolder() {
