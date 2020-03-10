@@ -32,6 +32,12 @@
             android:title="@string/pref_title_download_to_temporary_directory"
             android:summary="@string/pref_summary_download_to_temporary_directory"/>
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_download_to_external_storage"
+            android:title="@string/pref_title_download_to_external_storage"
+            android:summary="@string/pref_summary_download_to_external_storage"/>
+
         <Preference
             android:title="@string/pref_title_video_download_folder"
             android:key="@string/pref_key_video_download_folder"
