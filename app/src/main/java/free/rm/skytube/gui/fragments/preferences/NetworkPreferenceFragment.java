@@ -42,6 +42,10 @@ public class NetworkPreferenceFragment extends PreferenceFragment implements Sha
         String dir = SkyTubeApp.getSettings().getDownloadFolder(null);
         folderChooser.setSummary(getString(R.string.pref_summary_video_download_folder, dir != null ? dir : Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)));
 
+        findPreference(getString(R.string.pref_key_download_to_external_storage)).setOnPreferenceChangeListener((preference, newValue) -> {
+            folderChooser.setEnabled(!(boolean) newValue);
+            return true;
+        });
         ListPreference videoResolutionPref = (ListPreference)findPreference(getString(R.string.pref_key_video_download_preferred_resolution));
         String preferredVideoResolution = pref.getString(getString(R.string.pref_key_video_download_preferred_resolution), null);
         String preferredVideoResolutionName = preferredVideoResolution == null ? "" : VideoResolution.getAllVideoResolutionsNames()[Integer.parseInt(preferredVideoResolution)];
