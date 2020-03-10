@@ -695,4 +695,8 @@
     <string name="pref_title_download_to_temporary_directory">Use temporary folder for download</string>
     <string name="pref_summary_download_to_temporary_directory">Workaround for Download Manager bug, which unable to access external storage in some Android version.</string>
 
+    <string name="pref_key_download_to_external_storage" translatable="false">pref_key_download_to_external_storage</string>
+    <string name="pref_title_download_to_external_storage">Download to external storage (SD card)</string>
+    <string name="pref_summary_download_to_external_storage">Place the downloaded movies into the external storage.</string>
+
 </resources>
