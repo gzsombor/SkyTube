@@ -39,6 +39,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -439,6 +440,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
                 SubscriptionsTable.COL_CHANNEL_ID + " = ?",
                 new String[]{channelId});
 
+        Logger.i(this, "Update last visit time on %s to %s -> %s", channelId, new Date(currentTime), count);
         return (count > 0 ? currentTime : -1);
     }
 
@@ -487,6 +489,9 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 				values,
 				SubscriptionsTable.COL_CHANNEL_ID + " = ?",
 				new String[]{channel.getId()});
+
+		Logger.i(this, "Update last visit time on %s to %s -> %s", channel.getId(), new Date(channel.getLastVisitTime()), count);
+
 		return count > 0;
 	}
 
@@ -842,6 +847,13 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 		return (rowsDeleted >= 0);
 	}
 
+	private String toDate(Long ts) {
+		if (ts != null) {
+			return new Date(ts.longValue()).toString();
+		} else {
+			return "<not set>";
+		}
+	}
 	public List<ChannelView> getSubscribedChannelsByText(String searchText, boolean sortChannelsAlphabetically) {
 		List<ChannelView> result = new ArrayList<>();
 		try (Cursor cursor = createSubscriptionCursor(searchText, sortChannelsAlphabetically)) {
@@ -854,7 +866,9 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 				Long lastVisit = cursor.getLong(colLastVisit);
 				Long latestVideoTs = cursor.getLong(colLatestVideoTs);
 				boolean hasNew = (latestVideoTs != null && (lastVisit == null || latestVideoTs.longValue() > lastVisit.longValue()));
-				result.add(new ChannelView(cursor.getString(channelId), cursor.getString(title), cursor.getString(thumbnail), hasNew));
+				ChannelView cv = new ChannelView(cursor.getString(channelId), cursor.getString(title), cursor.getString(thumbnail), hasNew);
+				Logger.i(this, "getSubscribedChannelsByText " + cv.getTitle() + ", id=" + cv.getId() + ", lastVisit =" + toDate(lastVisit) + ", latestVideoTs=" + toDate(latestVideoTs));
+				result.add(cv);
 			}
 			return result;
 		}
