@@ -38,7 +38,7 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
     private long lastVideoPublishTimestamp;
 
 	@Override
-	public synchronized void init() throws IOException {
+	public synchronized void init() {
 		noMoreVideoPages = false;
 	}
 
@@ -62,7 +62,6 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 
 		return null;
 	}
-
 
 	private void log(List<YouTubeVideo> result) {
 	    StringBuilder b = new StringBuilder();
