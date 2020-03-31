@@ -94,8 +94,12 @@ dependencies {
     testImplementation 'junit:junit:4.13'
 
     // YouTube modules
-    implementation 'com.google.http-client:google-http-client-android:1.34.2'
-    implementation 'com.google.apis:google-api-services-youtube:v3-rev20200213-1.30.9'
+    implementation 'com.github.gzsombor.google-http-java-client:google-http-client-android:cf7d0c7499c19'
+    implementation ('com.google.apis:google-api-services-youtube:v3-rev20200213-1.30.9') {
+        exclude group: 'com.google.http-client', module:'google-http-client'
+        exclude group: 'com.google.http-client', module:'google-http-client-jackson2'
+    }
+
     implementation 'com.github.TeamNewPipe.NewPipeExtractor:extractor:65a7eda'
     //implementation 'com.github.gzsombor.NewPipeExtractor:extractor:41dd748cb3003cb2'
 
