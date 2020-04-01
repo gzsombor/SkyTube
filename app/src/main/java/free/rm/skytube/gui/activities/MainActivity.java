@@ -27,6 +27,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.FrameLayout;
 
@@ -98,6 +100,7 @@ public class MainActivity extends BaseActivity {
 	private static final String SEARCH_FRAGMENT_TAG = SEARCH_FRAGMENT + ".Tag";
 	private static final String[] FRAGMENTS = {MAIN_FRAGMENT, SEARCH_FRAGMENT, CHANNEL_BROWSER_FRAGMENT, PLAYLIST_VIDEOS_FRAGMENT};
 
+	private final static boolean translucentStatusBar = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +116,11 @@ public class MainActivity extends BaseActivity {
 		if (!updatesCheckerTaskRan) {
 			new UpdatesCheckerTask(this, false).executeInParallel();
 			updatesCheckerTaskRan = true;
+		}
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && translucentStatusBar) {
+			Window w = getWindow();
+			w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 		}
 
 		EventBus.getInstance().registerMainActivityListener(this);
