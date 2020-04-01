@@ -95,7 +95,7 @@ dependencies {
 
     // YouTube modules
     implementation 'com.github.gzsombor.google-http-java-client:google-http-client-android:cf7d0c7499c19'
-    implementation ('com.google.apis:google-api-services-youtube:v3-rev20200213-1.30.9') {
+    implementation ('com.google.apis:google-api-services-youtube:v3-rev20200312-1.30.9') {
         exclude group: 'com.google.http-client', module:'google-http-client'
         exclude group: 'com.google.http-client', module:'google-http-client-jackson2'
     }
