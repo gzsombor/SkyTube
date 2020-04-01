@@ -39,6 +39,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -102,6 +104,7 @@ public class MainActivity extends BaseActivity {
 	private static final String PLAYLIST_VIDEOS_FRAGMENT = "MainActivity.PlaylistVideosFragment";
 	private static final String VIDEO_BLOCKER_PLUGIN = "MainActivity.VideoBlockerPlugin";
 
+	private final static boolean translucentStatusBar = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +120,12 @@ public class MainActivity extends BaseActivity {
 			new UpdatesCheckerTask(this, false).executeInParallel();
 			updatesCheckerTaskRan = true;
 		}
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && translucentStatusBar) {
+			Window w = getWindow();
+			w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+		}
+
 
 		SkyTubeApp.setFeedUpdateInterval();
 		// Delete any missing downloaded videos
