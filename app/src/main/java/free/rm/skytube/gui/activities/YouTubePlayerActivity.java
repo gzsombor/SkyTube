@@ -141,7 +141,7 @@ public class YouTubePlayerActivity extends BaseActivity implements YouTubePlayer
 	 * @param fragment  Fragment to install and that is going to be displayed to the user.
 	 */
 	private void installFragment(FragmentEx fragment) {
-		Debug.logCaller(this, "installFragment");
+		// Debug.logCaller(this, "installFragment");
 
 		// either use the SkyTube's default video player or the legacy one
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -154,7 +154,7 @@ public class YouTubePlayerActivity extends BaseActivity implements YouTubePlayer
 
 	@Override
 	protected void onStart() {
-		Debug.logCaller(this, "activity-on-start");
+		// Debug.logCaller(this, "activity-on-start");
 		super.onStart();
 
 		// set the video player's orientation as what the user wants
@@ -174,7 +174,7 @@ public class YouTubePlayerActivity extends BaseActivity implements YouTubePlayer
 
 	@Override
 	protected void onStop() {
-		Debug.logCaller(this, "activity-on-STOP");
+		// Debug.logCaller(this, "activity-on-STOP");
 		super.onStop();
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 	}
