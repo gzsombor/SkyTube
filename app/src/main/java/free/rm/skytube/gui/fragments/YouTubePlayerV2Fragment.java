@@ -173,7 +173,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		hideNavigationBar();
-		Debug.logCaller(this, "onCreateView");
+		// Debug.logCaller(this, "onCreateView");
 
 
 		playerViewGestureHandler = new PlayerViewGestureHandler(SkyTubeApp.getSettings());
@@ -264,7 +264,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	 */
 	private void initViews(View view) {
 		// setup the toolbar / actionbar
-		Debug.logCaller(this, "initViews");
+		// Debug.logCaller(this, "initViews");
 
 		Toolbar toolbar = view.findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -701,7 +701,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 	@Override
 	public void onDestroy() {
-		Debug.logCaller(this, "onDestroy");
+		// Debug.logCaller(this, "onDestroy");
 
 		compositeDisposable.clear();
 		super.onDestroy();
