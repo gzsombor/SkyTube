@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,24 +33,38 @@ import free.rm.skytube.businessobjects.GetVideoDetailsTask;
 import free.rm.skytube.businessobjects.YouTube.newpipe.ContentId;
 
 /**
- * Activity that receives an intent from other apps in order to bookmark a video from another app.
- * This Activity uses a transparent theme, and finishes right away, so as not to take focus from the sharing app.s
+ * Base class for an activity that receives an intent from other apps in order to open/bookmark/etc a video.
+ * This Activity uses a transparent theme, and finishes right away, so as not to take focus from the sharing app.
  */
-public class ShareBookmarkActivity extends ExternalUrlActivity {
-
+abstract class ExternalUrlActivity extends AppCompatActivity {
     @Override
-    void handleVideoContent(ContentId content) {
-        new GetVideoDetailsTask(this, content, (videoUrl, video) -> {
-            if (video != null) {
-                video.bookmarkVideo(ShareBookmarkActivity.this);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(getIntent() != null) {
+            String textData = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+            ContentId content = SkyTubeApp.parseUrl(this, textData, false);
+            if (content != null && content.getType() == StreamingService.LinkType.STREAM) {
+                handleVideoContent(content);
             } else {
-                invalidUrlError();
+                handleTextData(textData);
             }
-        }).setFinishCallback(this::finish).executeInParallel();
+        }
     }
+
+    abstract void handleVideoContent(ContentId content);
 
     @StringRes
-    int invalidUrlErrorMessage() {
-        return R.string.bookmark_share_invalid_url;
+    abstract int invalidUrlErrorMessage();
+
+    protected void invalidUrlError() {
+        Toast.makeText(this, invalidUrlErrorMessage(), Toast.LENGTH_LONG).show();
+        finish();
     }
+
+    protected void handleTextData(String textData) {
+        SkyTubeApp.openUrl(this, textData, false);
+        finish();
+    }
+
 }
