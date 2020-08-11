@@ -142,5 +142,5 @@ dependencies {
     extraImplementation 'com.googlecode.android-query:android-query:0.25.9'
     extraImplementation 'com.sothree.slidinguppanel:library:3.4.0'
     extraImplementation 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
-    extraImplementation 'com.squareup.picasso:picasso:2.5.2'
+    extraImplementation 'com.squareup.picasso:picasso:2.71828'
 }
