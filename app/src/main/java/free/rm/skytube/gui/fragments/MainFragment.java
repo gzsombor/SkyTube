@@ -374,10 +374,15 @@ public class MainFragment extends FragmentEx {
 		}
 
 		void onSaveInstanceState(Bundle outState) {
-			for (VideosGridFragment videosGridFragment : videoGridFragmentsList) {
-				String key = videosGridFragment.getBundleKey();
-				if (key != null) {
-					fragmentManager.putFragment(outState, key, videosGridFragment);
+			fragmentManager.getFragments();
+			for (Fragment fragment : fragmentManager.getFragments()) {
+				Logger.i(this, "onSaveInstanceState fragment: "+fragment);
+				if (fragment instanceof VideosGridFragment) {
+					VideosGridFragment videosGridFragment = (VideosGridFragment) fragment;
+					String key = videosGridFragment.getBundleKey();
+					if (key != null) {
+						fragmentManager.putFragment(outState, key, videosGridFragment);
+					}
 				}
 			}
 		}
