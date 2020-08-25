@@ -111,7 +111,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation group: 'joda-time', name: 'joda-time', version: '2.10.6'
     implementation 'com.afollestad.material-dialogs:core:0.9.5.0'
-    implementation 'com.google.android.exoplayer:exoplayer:2.9.6'
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.8'
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation (group: 'com.optimaize.languagedetector', name: 'language-detector', version: '0.6') {
         exclude group: 'com.google.guava', module: 'guava'
