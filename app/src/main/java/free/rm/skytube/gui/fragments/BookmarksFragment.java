@@ -28,6 +28,7 @@ import butterknife.BindView;
 import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.AsyncTaskParallel;
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.VideoCategory;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.YouTube.newpipe.VideoId;
@@ -43,10 +44,12 @@ public class BookmarksFragment extends OrderableVideosGridFragment implements Bo
 	View noBookmarkedVideosText;
 
 	public BookmarksFragment() {
+		Logger.i(this, "ID "+this.hashCode()+ " CREATE ");
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
+		Logger.i(this, "ID "+this.hashCode()+ " onCreateView "+videoGridAdapter);
 		setVideoGridAdapter(new OrderableVideoGridAdapter(BookmarksDb.getBookmarksDb()));
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		swipeRefreshLayout.setEnabled(false);
@@ -61,6 +64,7 @@ public class BookmarksFragment extends OrderableVideosGridFragment implements Bo
 
 	@Override
 	public void onFragmentSelected() {
+		Logger.i(this, "ID "+this.hashCode()+ " onFragmentSelected "+videoGridAdapter);
 		super.onFragmentSelected();
 
 		if (BookmarksDb.getBookmarksDb().isHasUpdated()) {
