@@ -58,6 +58,8 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		Logger.i(this, "onCreateView " + videoGridAdapter);
+
 		if (videoGridAdapter == null) {
 			videoGridAdapter = new VideoGridAdapter();
 		}
@@ -86,6 +88,8 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 	 */
 	@Override
 	public void onResume() {
+		Logger.i(this, "onResume " + videoGridAdapter);
+
 		super.onResume();
 		if (videoGridAdapter != null) {
 			videoGridAdapter.initializeList();
@@ -107,6 +111,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 
 	@Override
 	public void onDestroy() {
+		Logger.i(this, "onDestroy " + videoGridAdapter);
 		videoGridAdapter.onDestroy();
 		videoGridAdapter = null;
 		super.onDestroy();
@@ -115,6 +120,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 	@Override
 	public void onFragmentSelected() {
 		super.onFragmentSelected();
+		Logger.i(this, "onFragmentSelected "+videoGridAdapter);
 		if (videoGridAdapter != null) {
 			videoGridAdapter.initializeList();
 		}
