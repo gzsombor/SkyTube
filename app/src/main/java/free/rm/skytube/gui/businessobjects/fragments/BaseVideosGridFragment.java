@@ -91,6 +91,10 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 		Logger.i(this, "onResume " + videoGridAdapter);
 
 		super.onResume();
+		if (videoGridAdapter != null) {
+			videoGridAdapter.initializeList();
+		}
+
 		int newUpdateCounter = PlaybackStatusDb.getPlaybackStatusDb().getUpdateCounter();
 		if(newUpdateCounter != updateCount) {
 			videoGridAdapter.notifyDataSetChanged();
