@@ -129,6 +129,8 @@ public class YouTubeVideo extends CardData implements Serializable {
 	private Long retrievalTimestamp;
 
 
+	private Integer categoryId;
+
 	/**
 	 * Constructor.
 	 */
@@ -174,6 +176,14 @@ public class YouTubeVideo extends CardData implements Serializable {
 
 			setViewCount(statistics.getViewCount());
 		}
+	}
+
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getCategoryId() {
+		return categoryId;
 	}
 
 	private void setViewCount(BigInteger viewsCountInt) {
