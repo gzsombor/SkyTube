@@ -42,6 +42,7 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 	private Context         context;
 	private YouTubeChannel	channel;
 	private boolean         displayToastMessage = true;
+	private Runnable		doOnFinish;
 
 	/**
 	 * Constructor.
@@ -49,11 +50,16 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 	 * @param subscribeButton	The subscribe button that the user has just clicked.
 	 * @param channel			The channel the user wants to subscribe / unsubscribe.
 	 */
-	public SubscribeToChannelTask(Context context, ChannelSubscriber subscribeButton, YouTubeChannel channel) {
-		this.subscribeToChannel = !subscribeButton.isUserSubscribed();
+	public SubscribeToChannelTask(Context context, ChannelSubscriber subscribeButton, YouTubeChannel channel, boolean subscribeToChannel, Runnable doOnFinish) {
+		this.subscribeToChannel = subscribeToChannel;
 		this.subscribeButton = subscribeButton;
 		this.context = context;
 		this.channel = channel;
+		this.doOnFinish = doOnFinish;
+	}
+
+	public SubscribeToChannelTask(Context context, ChannelSubscriber subscribeButton, YouTubeChannel channel, boolean subscribeToChannel) {
+		this(context, subscribeButton, channel, subscribeToChannel, null);
 	}
 
 	/**
@@ -125,6 +131,9 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 			Toast.makeText(context, err, Toast.LENGTH_LONG).show();
 		}
 
+		if (this.doOnFinish != null) {
+			doOnFinish.run();
+		}
 		this.subscribeButton = null;
 		this.context = null;
 	}
