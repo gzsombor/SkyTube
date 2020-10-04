@@ -38,7 +38,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
  * The (channel) subscribe button.
  */
 @RemoteViews.RemoteView
-public class SubscribeButton extends AppCompatButton implements View.OnClickListener {
+public class SubscribeButton extends AppCompatButton implements View.OnClickListener, ChannelSubscriber {
 
 	/** Is user subscribed to a channel? */
 	private boolean isUserSubscribed = false;
@@ -88,6 +88,7 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 		compositeDisposable.clear();
 	}
 
+	@Override
 	public void setChannel(YouTubeChannel channel) {
 		this.channel = channel;
 	}
@@ -96,6 +97,7 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 		this.fetchChannelVideosOnSubscribe = fetchChannelVideosOnSubscribe;
 	}
 
+	@Override
 	public boolean isUserSubscribed() {
 		return isUserSubscribed;
 	}
@@ -105,19 +107,16 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	 * Set the button's state to subscribe (i.e. once clicked, the user indicates that he wants to
 	 * subscribe).
 	 */
-	public void setSubscribeState() {
-		setText(R.string.subscribe);
-		isUserSubscribed = false;	// the user is currently NOT subscribed
-	}
-
-
-	/**
-	 * Set the button's state to unsubscribe (i.e. once clicked, the user indicates that he wants to
-	 * unsubscribe).
-	 */
-	public void setUnsubscribeState() {
-		setText(R.string.unsubscribe);
-		isUserSubscribed = true;
+	@Override
+	public void setSubscribedState(boolean subscribed) {
+		isUserSubscribed = subscribed;
+		if (subscribed) {
+			// the user is subscribed currently
+			setText(R.string.unsubscribe);
+		} else {
+			// the user is currently NOT subscribed
+			setText(R.string.subscribe);
+		}
 	}
 
 }
