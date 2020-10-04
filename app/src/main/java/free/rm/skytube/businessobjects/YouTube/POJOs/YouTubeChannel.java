@@ -311,7 +311,7 @@ public class YouTubeChannel extends CardData implements Serializable {
 		return success;
 	}
 
-	public static void subscribeChannel(final Context context, final Menu menu, final String channelId) {
+	public static void subscribeChannel(final Context context, final String channelId) {
 		if (channelId != null) {
 			new GetChannelInfo(context, youTubeChannel -> {
 				DatabaseResult result = SubscriptionsDb.getSubscriptionsDb().subscribe(youTubeChannel);

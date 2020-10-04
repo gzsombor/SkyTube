@@ -450,7 +450,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 
 		// check if the user has subscribed to a channel... if he has, then change the state of
 		// the subscribe button
-		new CheckIfUserSubbedToChannelTask(videoDescSubscribeButton, youTubeVideo.getChannelId()).execute();
+		new CheckIfUserSubbedToChannelTask(getContext(), videoDescSubscribeButton, youTubeVideo.getChannelId()).execute();
 	}
 
 
@@ -724,7 +724,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 	            youTubeChannel.blockChannel();
 				return true;
 			case R.id.subscribe_channel:
-				YouTubeChannel.subscribeChannel(getContext(), menu, youTubeVideo.getChannelId());
+				YouTubeChannel.subscribeChannel(getContext(), youTubeVideo.getChannelId());
 				return true;
 
 			case R.id.open_channel:
