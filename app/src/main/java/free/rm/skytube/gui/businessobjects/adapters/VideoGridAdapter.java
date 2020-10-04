@@ -96,6 +96,7 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 	public void onDestroy() {
 		PlaybackStatusDb.getPlaybackStatusDb().removeListener(this);
 		this.listener = null;
+		this.swipeRefreshLayout = null;
 		this.videoGridUpdated = null;
 	}
 
