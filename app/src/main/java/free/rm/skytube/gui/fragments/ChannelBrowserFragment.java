@@ -32,12 +32,17 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.typeface.library.materialdesigniconic.MaterialDesignIconic;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import free.rm.skytube.R;
 import free.rm.skytube.app.Utils;
 import free.rm.skytube.businessobjects.Logger;
@@ -54,10 +59,11 @@ import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
 /**
  * A Fragment that displays information about a channel.
  *
- * This fragment is made up of two other fragments:
+ * This fragment is made up of three other fragments:
  * <ul>
  *     <li>{@link ChannelVideosFragment}</li>
  *     <li>{@link ChannelPlaylistsFragment}.</li>
+ *     <li>{@link ChannelAboutFragment}.</li>
  * </ul>
  */
 public class ChannelBrowserFragment extends FragmentEx {
@@ -68,10 +74,12 @@ public class ChannelBrowserFragment extends FragmentEx {
 	public static final String FRAGMENT_CHANNEL_VIDEOS = "ChannelBrowserFragment.FRAGMENT_CHANNEL_VIDEOS";
 	public static final String FRAGMENT_CHANNEL_PLAYLISTS = "ChannelBrowserFragment.FRAGMENT_CHANNEL_PLAYLISTS";
 
-	private ImageView 			channelThumbnailImage = null;
-	private ImageView			channelBannerImage = null;
-	private TextView			channelSubscribersTextView = null;
-	private SubscribeButton		channelSubscribeButton = null;
+	@BindView(R.id.channel_thumbnail_image_view)
+	ImageView 			channelThumbnailImage = null;
+	@BindView(R.id.channel_banner_image_view)
+	ImageView			channelBannerImage = null;
+	@BindView(R.id.channel_subs_text_view)
+	TextView			channelSubscribersTextView = null;
 	private GetChannelInfo   	task = null;
 
 	public static final String CHANNEL_OBJ = "ChannelBrowserFragment.ChannelObj";
@@ -83,8 +91,11 @@ public class ChannelBrowserFragment extends FragmentEx {
 	private ChannelAboutFragment        channelAboutFragment;
 
 	private ChannelPagerAdapter channelPagerAdapter;
-	private ViewPager viewPager;
+	@BindView(R.id.pager)
+	ViewPager viewPager;
 
+	@BindView(R.id.channel_subscribe_button)
+	ExtendedFloatingActionButton fabSubscribe;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -96,7 +107,10 @@ public class ChannelBrowserFragment extends FragmentEx {
 
 		// inflate the layout for this fragment
 		View fragment = inflater.inflate(R.layout.fragment_channel_browser, container, false);
-		viewPager = fragment.findViewById(R.id.pager);
+
+		ButterKnife.bind(this, fragment);
+
+		fabSubscribe.setIcon(new IconicsDrawable(getContext(),MaterialDesignIconic.Icon.gmi_favorite));
 
 		TabLayout tabLayout = fragment.findViewById(R.id.tab_layout);
 		tabLayout.setupWithViewPager(viewPager);
@@ -138,10 +152,6 @@ public class ChannelBrowserFragment extends FragmentEx {
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		channelBannerImage = fragment.findViewById(R.id.channel_banner_image_view);
-		channelThumbnailImage = fragment.findViewById(R.id.channel_thumbnail_image_view);
-		channelSubscribersTextView = fragment.findViewById(R.id.channel_subs_text_view);
-		channelSubscribeButton = fragment.findViewById(R.id.channel_subscribe_button);
 		channelSubscribeButton.setFetchChannelVideosOnSubscribe(false);
 		channelSubscribeButton.setOnClickListener(v -> {
 			// If we're subscribing to the channel, save the list of videos we have into the channel (to be stored in the database by SubscribeToChannelTask)
