@@ -662,7 +662,7 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 		// check if the user has subscribed to a channel... if he has, then change the state of
 		// the subscribe button
-		new CheckIfUserSubbedToChannelTask(videoDescSubscribeButton, youTubeVideo.getChannelId()).execute();
+		new CheckIfUserSubbedToChannelTask(getContext(), videoDescSubscribeButton, youTubeVideo.getChannelId()).execute();
 	}
 
 	@Override
