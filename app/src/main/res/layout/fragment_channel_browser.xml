@@ -82,13 +82,6 @@
 						android:text="@string/loading"
 						style="@style/ChannelSubsTextView"/>
 
-					<!-- SUBSCRIBE BUTTON -->
-					<free.rm.skytube.gui.businessobjects.views.SubscribeButton
-						android:id="@+id/channel_subscribe_button"
-						style="@style/SubscribeButton"
-						android:layout_alignParentRight="true"
-						android:layout_centerVertical="true"
-						android:layout_margin="16dp"/>
 
 				</RelativeLayout>
 
@@ -105,5 +98,16 @@
 			app:tabMode="scrollable"/>
 
 	</com.google.android.material.appbar.AppBarLayout>
+
+	<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+		android:id="@+id/channel_subscribe_button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="8dp"
+		android:visibility="invisible"
+		android:text="@string/subscribe"
+
+		app:layout_anchor="@id/tab_layout"
+		app:layout_anchorGravity="bottom|right|end" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

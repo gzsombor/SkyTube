@@ -132,10 +132,7 @@ public class ChromecastControllerFragment extends ChromecastBaseControllerFragme
 
 
 		new GetChannelInfo(getActivity(), youTubeChannel -> {
-			if(youTubeChannel.isUserSubscribed())
-				videoDescriptionLayout.subscribeButton.setUnsubscribeState();
-			else
-				videoDescriptionLayout.subscribeButton.setSubscribeState();
+			videoDescriptionLayout.subscribeButton.setSubscribedState(youTubeChannel.isUserSubscribed());
 			videoDescriptionLayout.subscribeButton.setChannel(youTubeChannel);
 
 			if (youTubeChannel != null) {
