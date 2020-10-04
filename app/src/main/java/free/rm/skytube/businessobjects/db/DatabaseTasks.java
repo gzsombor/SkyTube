@@ -21,6 +21,7 @@ import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.YouTube.VideoBlocker;
 import free.rm.skytube.businessobjects.YouTube.newpipe.NewPipeService;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
+import free.rm.skytube.gui.businessobjects.views.ChannelSubscriber;
 import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
 import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -51,11 +52,7 @@ public class DatabaseTasks {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(isUserSubbed -> {
-                    if (isUserSubbed) {
-                        subscribeButton.setUnsubscribeState();
-                    } else {
-                        subscribeButton.setSubscribeState();
-                    }
+                    subscribeButton.setSubscribedState(isUserSubbed);
                 }, throwable -> {
                     Log.e(TAG, "Unable to check if user has subscribed to channel id=" + channelId, throwable);
                     String err = String.format(SkyTubeApp.getStr(R.string.error_check_if_user_has_subbed), channelId);
@@ -179,7 +176,7 @@ public class DatabaseTasks {
      * @param displayToastMessage Whether or not a toast should be shown.
      */
     public static Single<DatabaseResult> subscribeToChannel(boolean subscribeToChannel,
-                                                            @Nullable SubscribeButton subscribeButton,
+                                                            @Nullable ChannelSubscriber subscribeButton,
                                                             @NonNull Context context,
                                                             @NonNull YouTubeChannel channel,
                                                             boolean displayToastMessage) {
@@ -203,7 +200,7 @@ public class DatabaseTasks {
                         if (subscribeToChannel) {
                             // change the state of the button
                             if (subscribeButton != null)
-                                subscribeButton.setUnsubscribeState();
+                                subscribeButton.setSubscribedState(true);
                             // Also change the subscription state of the channel
                             channel.setUserSubscribed(true);
 
@@ -216,7 +213,7 @@ public class DatabaseTasks {
                         } else {
                             // change the state of the button
                             if (subscribeButton != null)
-                                subscribeButton.setSubscribeState();
+                                subscribeButton.setSubscribedState(false);
                             // Also change the subscription state of the channel
                             channel.setUserSubscribed(false);
 
