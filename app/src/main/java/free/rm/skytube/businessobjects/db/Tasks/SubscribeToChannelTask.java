@@ -27,7 +27,7 @@ import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 import free.rm.skytube.businessobjects.db.DatabaseResult;
 import free.rm.skytube.businessobjects.db.SubscriptionsDb;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
-import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
+import free.rm.skytube.gui.businessobjects.views.ChannelSubscriber;
 import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
 
 /**
@@ -38,11 +38,10 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 	/** Set to true if the user wants to subscribe to a youtube channel;  false if the user wants to
 	 *  unsubscribe. */
 	private boolean			subscribeToChannel;
-	private SubscribeButton subscribeButton;
+	private ChannelSubscriber subscribeButton;
 	private Context         context;
 	private YouTubeChannel	channel;
 	private boolean         displayToastMessage = true;
-
 
 	/**
 	 * Constructor.
@@ -50,13 +49,12 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 	 * @param subscribeButton	The subscribe button that the user has just clicked.
 	 * @param channel			The channel the user wants to subscribe / unsubscribe.
 	 */
-	public SubscribeToChannelTask(SubscribeButton subscribeButton, YouTubeChannel channel) {
+	public SubscribeToChannelTask(Context context, ChannelSubscriber subscribeButton, YouTubeChannel channel) {
 		this.subscribeToChannel = !subscribeButton.isUserSubscribed();
 		this.subscribeButton = subscribeButton;
-		this.context = subscribeButton.getContext();
+		this.context = context;
 		this.channel = channel;
 	}
-
 
 	/**
 	 * Constructor.  Will unsubscribe the given channel.  No toast messages will be displayed.
@@ -94,7 +92,7 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 			if (subscribeToChannel) {
 				// change the state of the button
 				if (subscribeButton != null)
-					subscribeButton.setUnsubscribeState();
+					subscribeButton.setSubscribedState(true);
 				// Also change the subscription state of the channel
 				channel.setUserSubscribed(true);
 
@@ -107,7 +105,7 @@ public class SubscribeToChannelTask extends AsyncTaskParallel<Void, Void, Databa
 			} else {
 				// change the state of the button
 				if (subscribeButton != null)
-					subscribeButton.setSubscribeState();
+					subscribeButton.setSubscribedState(false);
 				// Also change the subscription state of the channel
 				channel.setUserSubscribed(false);
 				
