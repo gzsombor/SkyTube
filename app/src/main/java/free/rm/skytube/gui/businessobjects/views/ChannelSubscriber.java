@@ -21,5 +21,4 @@ import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 public interface ChannelSubscriber {
     void setSubscribedState(boolean subscribed);
     void setChannel(YouTubeChannel channel);
-    boolean isUserSubscribed();
 }

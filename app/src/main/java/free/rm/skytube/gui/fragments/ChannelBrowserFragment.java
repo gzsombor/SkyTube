@@ -21,11 +21,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -38,7 +40,6 @@ import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.library.materialdesigniconic.MaterialDesignIconic;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,14 +48,13 @@ import butterknife.ButterKnife;
 import free.rm.skytube.R;
 import free.rm.skytube.app.EventBus;
 import free.rm.skytube.businessobjects.Logger;
-import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannelInterface;
-import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.DatabaseTasks;
 import free.rm.skytube.gui.businessobjects.fragments.FragmentEx;
 import free.rm.skytube.gui.businessobjects.fragments.TabFragment;
-import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import free.rm.skytube.gui.businessobjects.views.ChannelSubscriber;
 
 /**
  * A Fragment that displays information about a channel.
@@ -66,15 +66,16 @@ import io.reactivex.rxjava3.disposables.Disposable;
  *     <li>{@link ChannelAboutFragment}.</li>
  * </ul>
  */
-public class ChannelBrowserFragment extends FragmentEx {
+public class ChannelBrowserFragment extends FragmentEx implements ChannelSubscriber {
 
 	private YouTubeChannel		channel;
 	private String 				channelId;
+	private Boolean 			userSubscribed;
 
 	public static final String FRAGMENT_CHANNEL_VIDEOS = "ChannelBrowserFragment.FRAGMENT_CHANNEL_VIDEOS";
 	public static final String FRAGMENT_CHANNEL_PLAYLISTS = "ChannelBrowserFragment.FRAGMENT_CHANNEL_PLAYLISTS";
 
-	private Disposable          disposable = null;
+	private CompositeDisposable          disposable = new CompositeDisposable();
 
 	@BindView(R.id.channel_thumbnail_image_view)
 	ImageView 			channelThumbnailImage = null;
@@ -96,7 +97,7 @@ public class ChannelBrowserFragment extends FragmentEx {
 	ViewPager viewPager;
 
 	@BindView(R.id.channel_subscribe_button)
-	ExtendedFloatingActionButton fabSubscribe;
+	ExtendedFloatingActionButton channelSubscribeButton;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -110,8 +111,6 @@ public class ChannelBrowserFragment extends FragmentEx {
 		View fragment = inflater.inflate(R.layout.fragment_channel_browser, container, false);
 
 		ButterKnife.bind(this, fragment);
-
-		fabSubscribe.setIcon(new IconicsDrawable(getContext(),MaterialDesignIconic.Icon.gmi_favorite));
 
 		TabLayout tabLayout = fragment.findViewById(R.id.tab_layout);
 		tabLayout.setupWithViewPager(viewPager);
@@ -153,20 +152,18 @@ public class ChannelBrowserFragment extends FragmentEx {
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		channelSubscribeButton.setFetchChannelVideosOnSubscribe(false);
-		channelSubscribeButton.setOnClickListener(v -> {
-			// If we're subscribing to the channel, save the list of videos we have into the channel (to be stored in the database by SubscribeToChannelTask)
-			if(channel != null && !channel.isUserSubscribed()) {
-				Iterator<CardData> iterator = channelVideosFragment.getVideoGridAdapter().getIterator();
-				while (iterator.hasNext()) {
-					CardData cd = iterator.next();
-					if (cd instanceof YouTubeVideo) {
-						channel.addYouTubeVideo((YouTubeVideo) cd);
-					}
-				}
+
+		channelSubscribeButton.setOnClickListener(view -> {
+			if (userSubscribed != null && channel != null) {
+				startAnimation(view);
+				disposable.add(
+					DatabaseTasks.subscribeToChannel(!userSubscribed, ChannelBrowserFragment.this, getContext(), channel, true).subscribe(result -> {
+						ViewCompat.animate(view).setDuration(200);
+						view.setRotation(0);
+					})
+				);
 			}
 		});
-
 		getChannelParameters();
 
 		return fragment;
@@ -177,8 +174,40 @@ public class ChannelBrowserFragment extends FragmentEx {
 		if (disposable != null) {
 			disposable.dispose();
 		}
-		channelSubscribeButton.clearBackgroundTasks();
 		super.onDestroy();
+	}
+
+	private static void startAnimation(View fab) {
+		fab.setRotation(0);
+		ViewCompat.animate(fab)
+				.rotation(360)
+				.withLayer()
+				//.setDuration(1000)
+				.setInterpolator(new AccelerateDecelerateInterpolator())
+				.start();
+	}
+
+	@Override
+	public void setSubscribedState(boolean subscribed) {
+		channelSubscribeButton.setVisibility(View.VISIBLE);
+		userSubscribed = subscribed;
+		if (subscribed) {
+			channelSubscribeButton.setIcon(new IconicsDrawable(getContext(), MaterialDesignIconic.Icon.gmi_eye_off));
+			channelSubscribeButton.setText(R.string.unsubscribe);
+		} else {
+			channelSubscribeButton.setIcon(new IconicsDrawable(getContext(), MaterialDesignIconic.Icon.gmi_eye));
+			channelSubscribeButton.setText(R.string.subscribe);
+		}
+	}
+
+	@Override
+	public void setChannel(YouTubeChannel channel) {
+		this.channel = channel;
+		if (channel != null) {
+			this.channelId = channel.getId();
+		} else {
+			this.channelId = null;
+		}
 	}
 
 	private void getChannelParameters() {
@@ -200,19 +229,17 @@ public class ChannelBrowserFragment extends FragmentEx {
 			}
 		}
 		if (channel == null) {
-			if (disposable == null) {
-				disposable = DatabaseTasks.getChannelInfo(requireContext(), channelId, false)
-						.subscribe(youTubeChannel -> {
-							if (youTubeChannel == null) {
-								return;
-							}
-							// In the event this fragment is passed a channel id and not a channel object, set the
-							// channel the subscribe button is for since there wasn't a channel object to set when
-							// the button was created.
-							channel = youTubeChannel;
-							initViews();
-						});
-			}
+			disposable.add(DatabaseTasks.getChannelInfo(requireContext(), channelId, false)
+				.subscribe(youTubeChannel -> {
+					if (youTubeChannel == null) {
+						return;
+					}
+					// In the event this fragment is passed a channel id and not a channel object, set the
+					// channel the subscribe button is for since there wasn't a channel object to set when
+					// the button was created.
+					channel = youTubeChannel;
+					initViews();
+				}));
 		} else {
 			initViews();
 		}
@@ -284,14 +311,9 @@ public class ChannelBrowserFragment extends FragmentEx {
 
 			// if the user has subscribed to this channel, then change the state of the
 			// subscribe button
-			channelSubscribeButton.setChannel(channel);
-			if (channel.isUserSubscribed()) {
-				channelSubscribeButton.setUnsubscribeState();
-			} else {
-				channelSubscribeButton.setSubscribeState();
-			}
+			setSubscribedState(channel.isUserSubscribed());
 
-			if (channel.isUserSubscribed()) {
+			if (userSubscribed) {
 				// the user is visiting the channel, so we need to update the last visit time
 				channel.updateLastVisitTime();
 
