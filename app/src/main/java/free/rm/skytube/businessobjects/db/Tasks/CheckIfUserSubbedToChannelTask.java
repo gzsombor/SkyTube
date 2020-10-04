@@ -17,6 +17,7 @@
 
 package free.rm.skytube.businessobjects.db.Tasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import free.rm.skytube.R;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.db.SubscriptionsDb;
+import free.rm.skytube.gui.businessobjects.views.ChannelSubscriber;
 import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
 
 /**
@@ -31,8 +33,9 @@ import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
  */
 public class CheckIfUserSubbedToChannelTask extends AsyncTask<Void, Void, Boolean> {
 
-	private SubscribeButton	subscribeButton;
+	private ChannelSubscriber	subscribeButton;
 	private String			channelId;
+	private Context			context;
 
 	private static String TAG = CheckIfUserSubbedToChannelTask.class.getSimpleName();
 
@@ -43,7 +46,8 @@ public class CheckIfUserSubbedToChannelTask extends AsyncTask<Void, Void, Boolea
 	 * @param subscribeButton	The subscribe button that the user has just clicked.
 	 * @param channelId			The channel ID the user wants to subscribe / unsubscribe.
 	 */
-	public CheckIfUserSubbedToChannelTask(SubscribeButton subscribeButton, String channelId) {
+	public CheckIfUserSubbedToChannelTask(Context context, ChannelSubscriber subscribeButton, String channelId) {
+		this.context = context;
 		this.subscribeButton = subscribeButton;
 		this.channelId = channelId;
 	}
@@ -66,11 +70,9 @@ public class CheckIfUserSubbedToChannelTask extends AsyncTask<Void, Void, Boolea
 	protected void onPostExecute(Boolean isUserSubbed) {
 		if (isUserSubbed == null) {
 			String err = String.format(SkyTubeApp.getStr(R.string.error_check_if_user_has_subbed), channelId);
-			Toast.makeText(subscribeButton.getContext(), err, Toast.LENGTH_LONG).show();
-		} else if (isUserSubbed) {
-			subscribeButton.setUnsubscribeState();
+			Toast.makeText(context, err, Toast.LENGTH_LONG).show();
 		} else {
-			subscribeButton.setSubscribeState();
+			subscribeButton.setSubscribedState(isUserSubbed);
 		}
 	}
 

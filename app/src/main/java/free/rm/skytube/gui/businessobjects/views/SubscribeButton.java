@@ -68,7 +68,7 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 			}
 		}
 		if(channel != null)
-			new SubscribeToChannelTask(getContext(), SubscribeButton.this, channel).executeInParallel();
+			new SubscribeToChannelTask(getContext(), SubscribeButton.this, channel, !isUserSubscribed).executeInParallel();
 	}
 
 	@Override
@@ -85,12 +85,6 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 	public void setFetchChannelVideosOnSubscribe(boolean fetchChannelVideosOnSubscribe) {
 		this.fetchChannelVideosOnSubscribe = fetchChannelVideosOnSubscribe;
 	}
-
-	@Override
-	public boolean isUserSubscribed() {
-		return isUserSubscribed;
-	}
-
 
 	/**
 	 * Set the button's state to subscribe (i.e. once clicked, the user indicates that he wants to
