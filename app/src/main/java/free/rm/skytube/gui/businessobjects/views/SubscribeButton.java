@@ -97,12 +97,6 @@ public class SubscribeButton extends AppCompatButton implements View.OnClickList
 		this.fetchChannelVideosOnSubscribe = fetchChannelVideosOnSubscribe;
 	}
 
-	@Override
-	public boolean isUserSubscribed() {
-		return isUserSubscribed;
-	}
-
-
 	/**
 	 * Set the button's state to subscribe (i.e. once clicked, the user indicates that he wants to
 	 * subscribe).
