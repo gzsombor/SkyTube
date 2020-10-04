@@ -45,7 +45,6 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import free.rm.skytube.R;
-import free.rm.skytube.app.Utils;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
@@ -55,7 +54,6 @@ import free.rm.skytube.businessobjects.db.DatabaseTasks;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
 import free.rm.skytube.gui.businessobjects.fragments.FragmentEx;
 import free.rm.skytube.gui.businessobjects.fragments.TabFragment;
-import free.rm.skytube.gui.businessobjects.views.SubscribeButton;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
