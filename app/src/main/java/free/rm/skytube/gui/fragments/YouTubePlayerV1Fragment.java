@@ -736,7 +736,7 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 	            compositeDisposable.add(youTubeChannel.blockChannel().subscribe());
 				return true;
 			case R.id.subscribe_channel:
-				YouTubeChannel.subscribeChannel(getContext(), menu, youTubeVideo.getChannelId());
+				compositeDisposable.add(YouTubeChannel.subscribeChannel(getContext(), youTubeVideo.getChannelId()));
 				return true;
 
 			case R.id.open_channel:
