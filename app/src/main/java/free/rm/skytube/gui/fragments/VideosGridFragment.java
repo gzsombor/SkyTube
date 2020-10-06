@@ -42,6 +42,8 @@ public abstract class VideosGridFragment extends BaseVideosGridFragment {
 	@BindView(R.id.grid_view)
 	protected RecyclerView	gridView;
 
+	protected FragmentHolder fragmentHolder;
+
 	public VideosGridFragment() {
 	}
 
@@ -69,12 +71,18 @@ public abstract class VideosGridFragment extends BaseVideosGridFragment {
 
 	@Override
 	public void onDestroyView() {
+		if (fragmentHolder != null) {
+			fragmentHolder.fragmentDestroyed(this);
+		}
 		gridView.setAdapter(null);
 		videoGridAdapter.onDestroy();
 		super.onDestroyView();
 		Glide.get(getActivity()).clearMemory();
 	}
 
+	public void setFragmentHolder(FragmentHolder fragmentHolder) {
+		this.fragmentHolder = fragmentHolder;
+	}
 
 	@Override
 	protected int getLayoutResource() {
