@@ -43,7 +43,7 @@ import free.rm.skytube.gui.businessobjects.MainActivityListener;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
 import free.rm.skytube.gui.businessobjects.fragments.FragmentEx;
 
-public class MainFragment extends FragmentEx {
+public class MainFragment extends FragmentEx implements FragmentHolder {
 
 	private static final int TOP_LIST_INDEX = 0;
 
@@ -52,7 +52,6 @@ public class MainFragment extends FragmentEx {
 	private ActionBarDrawerToggle		subsDrawerToggle;
 	private TabLayout                   tabLayout = null;
 	private DrawerLayout 				subsDrawerLayout = null;
-	private SearchView 					subSearchView = null;
 
 
 	// Constants for saving the state of this Fragment's child Fragments
@@ -99,7 +98,7 @@ public class MainFragment extends FragmentEx {
 		}
 
 		subsListView = view.findViewById(R.id.subs_drawer);
-		subSearchView = view.findViewById(R.id.subs_search_view);
+		SearchView subSearchView = view.findViewById(R.id.subs_search_view);
 		AutoCompleteTextView autoCompleteTextView = subSearchView.findViewById(androidx.appcompat.R.id.search_src_text);
 		int fontColor = ContextCompat.getColor(getContext(), R.color.subs_text);
 		autoCompleteTextView.setTextColor(fontColor);
@@ -281,7 +280,13 @@ public class MainFragment extends FragmentEx {
 		videosPagerAdapter.notifyDataSetChanged();
 	}
 
-	public static class SimplePagerAdapter extends FragmentPagerAdapter {
+	@Override
+	public void fragmentDestroyed(VideosGridFragment videosGridFragment) {
+		System.out.println("fragmentDestroyed " +videosGridFragment);
+		//videosPagerAdapter
+	}
+
+	public class SimplePagerAdapter extends FragmentPagerAdapter {
 		private final SparseArray<WeakReference<Fragment>> instantiatedFragments = new SparseArray<>();
 		private final List<String> visibleTabs = new ArrayList<>();
 
@@ -306,7 +311,11 @@ public class MainFragment extends FragmentEx {
 		public synchronized Fragment getItem(int position) {
 			if (0<=position && position<visibleTabs.size()) {
 				String key = visibleTabs.get(position);
-				return create(key);
+				VideosGridFragment videosGridFragment = create(key);
+				if (videosGridFragment != null) {
+					videosGridFragment.setFragmentHolder(MainFragment.this);
+				}
+				return videosGridFragment;
 			}
 			return null;
 		}
