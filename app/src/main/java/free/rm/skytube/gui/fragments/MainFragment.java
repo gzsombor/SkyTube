@@ -41,7 +41,7 @@ import free.rm.skytube.gui.activities.BaseActivity;
 import free.rm.skytube.gui.businessobjects.adapters.SubsAdapter;
 import free.rm.skytube.gui.businessobjects.fragments.FragmentEx;
 
-public class MainFragment extends FragmentEx {
+public class MainFragment extends FragmentEx implements FragmentHolder {
 
 	private static final int TOP_LIST_INDEX = 0;
 
@@ -294,6 +294,11 @@ public class MainFragment extends FragmentEx {
 		subsAdapter.removeChannel(channelId);
 	}
 
+	@Override
+	public void fragmentDestroyed(VideosGridFragment videosGridFragment) {
+		Logger.i(this, "fragmentDestroyed " +videosGridFragment);
+	}
+
 	public class SimplePagerAdapter extends FragmentPagerAdapter {
 		private final WeaklyReferencedMap<String, VideosGridFragment> instantiatedFragments = new WeaklyReferencedMap<>();
 		private final List<String> visibleTabs = new ArrayList<>();
@@ -352,6 +357,9 @@ public class MainFragment extends FragmentEx {
 			if (fragment == null && create){
 				fragment = create(key);
 				instantiatedFragments.put(key, fragment);
+			}
+			if (fragment != null) {
+				fragment.setFragmentHolder(MainFragment.this);
 			}
 			return fragment;
 		}
