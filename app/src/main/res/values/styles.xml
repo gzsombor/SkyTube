@@ -1,12 +1,12 @@
 <resources>
 
 	<!-- SkyTube theme -->
-	<style name="AppTheme" parent="Theme.MaterialComponents.Light">
+	<style name="AppTheme" parent="Theme.MaterialComponents">
 		<item name="colorPrimary">@color/colorPrimary</item>
 		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 		<item name="colorAccent">@color/colorAccent</item>
 
-		<item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>
+<!--		<item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>-->
 		<item name="android:popupMenuStyle">@style/PopupMenu</item>
 		<item name="popupMenuStyle">@style/PopupMenu</item>
 
@@ -17,6 +17,15 @@
 		<item name="android:textAppearanceSmallPopupMenu">@style/VideoOptionsTextAppearanceSmall</item>
 	</style>
 
+	<style name="AppTheme.CustomBackground" parent="AppTheme">
+		<item name="android:background">@color/colorPrimary</item>
+	</style>
+	<style name="AppTheme.Tabs" parent="Widget.MaterialComponents.TabLayout">
+		<item name="android:background">@color/colorPrimary</item>
+		<item name="tabIndicatorColor">@color/colorAccent</item>
+		<item name="tabSelectedTextColor">@color/brightText</item>
+		<item name="tabTextColor">@color/darkerText</item>
+	</style>
 
 	<!-- *************************************************************************************** -->
 	<!--
@@ -91,14 +100,14 @@
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:textColor">@color/subs_text</item>
-		<item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>
+<!--		<item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>-->
 	</style>
 
 	<style name="SubscribeButton" parent="AppTheme">
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:textColor">@color/subs_text</item>
-		<item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>
+<!--		<item name="android:textAppearance">@style/TextAppearance.AppCompat.Small</item>-->
 		<item name="android:minHeight">0dp</item>
 		<item name="android:minWidth">0dp</item>
 		<item name="android:padding">3dp</item>
