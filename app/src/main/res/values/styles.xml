@@ -2,7 +2,7 @@
 
 	<!-- SkyTube theme -->
 	<style name="AppTheme" parent="Theme.MaterialComponents">
-		<item name="colorPrimary">@color/colorPrimary</item>
+		<item name="colorPrimary">@color/colorAccent</item>
 		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 		<item name="colorAccent">@color/colorAccent</item>
 
@@ -10,11 +10,17 @@
 		<item name="android:popupMenuStyle">@style/PopupMenu</item>
 		<item name="popupMenuStyle">@style/PopupMenu</item>
 
+		<item name="preferenceTheme">@style/AppTheme.Preferences</item>
+
 		<item name="textAppearanceLargePopupMenu">@style/VideoOptionsTextAppearanceLarge</item>
 		<item name="android:textAppearanceLargePopupMenu">@style/VideoOptionsTextAppearanceLarge</item>
 
 		<item name="textAppearanceSmallPopupMenu">@style/VideoOptionsTextAppearanceSmall</item>
 		<item name="android:textAppearanceSmallPopupMenu">@style/VideoOptionsTextAppearanceSmall</item>
+	</style>
+
+
+	<style name="AppTheme.Preferences" parent="PreferenceThemeOverlay">
 	</style>
 
 	<style name="AppTheme.CustomBackground" parent="AppTheme">
