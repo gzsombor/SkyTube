@@ -49,19 +49,14 @@ import androidx.media.AudioManagerCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.UnrecognizedInputFormatException;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import org.schabi.newpipe.extractor.stream.StreamInfo;
@@ -115,8 +110,8 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	private YouTubeChannel          youTubeChannel = null;
 
 	@BindView(R.id.player_view)
-	protected PlayerView              playerView;
-	private SimpleExoPlayer         player;
+	protected StyledPlayerView              playerView;
+	private SimpleExoPlayer  player;
 	private DatasourceBuilder datasourceBuilder;
 
 	private long				    playerInitialPosition = 0;
@@ -162,10 +157,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	protected ExpandableListView      commentsExpandableListView = null;
 	private YouTubePlayerActivityListener listener = null;
 	private PlayerViewGestureHandler playerViewGestureHandler;
-
-	@BindView(R.id.playbackSpeed)
-	protected TextView playbackSpeedTextView;
-	private PlaybackSpeedController playbackSpeedController;
 
 	private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 	private Unbinder unbinder;
@@ -290,7 +281,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				commentsAdapter = new CommentsAdapter(getActivity(), youTubeVideo.getId(), commentsExpandableListView, commentsProgressBar, noVideoCommentsView);
 			}
 		});
-        this.playbackSpeedController= new PlaybackSpeedController(getContext(), playbackSpeedTextView, player);
 
 		Linker.configure(this.videoDescriptionTextView);
 
@@ -306,13 +296,14 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 			}
 			player.addListener(new Player.EventListener() {
 				@Override
-				public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-					Logger.i(this, ">> onPlayerStateChanged " + playWhenReady + " state=" + playbackState);
-					if (playbackState == Player.STATE_READY && playWhenReady) {
+				public void onPlaybackStateChanged(int playbackState) {
+					Logger.i(this, ">> onPlaybackStateChanged state=" + playbackState);
+					if (playbackState == Player.STATE_READY) {
 						preventDeviceSleeping(true);
-						playbackSpeedController.updateMenu();
+						playerView.hideController();
 					} else {
 						preventDeviceSleeping(false);
+						playerView.showController();
 					}
 				}
 
@@ -349,20 +340,13 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				}
 			});
 			player.setPlayWhenReady(true);
-			player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);    // ensure that videos are played in their correct aspect ratio
+			player.setVideoScalingMode(Renderer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);    // ensure that videos are played in their correct aspect ratio
 			playerView.setPlayer(player);
 		}
 	}
 
 	private SimpleExoPlayer createExoPlayer() {
-		DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-		TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-		DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-		Context context = getContext();
-		DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(context);
-
-		return ExoPlayerFactory.newSimpleInstance(getContext(), defaultRenderersFactory, trackSelector, new DefaultLoadControl(), null, bandwidthMeter);
+		return new SimpleExoPlayer.Builder(getContext()).build();
 	}
 
 
