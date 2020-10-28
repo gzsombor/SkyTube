@@ -8,13 +8,26 @@
              tools:context=".gui.fragments.YouTubePlayerV1Fragment">
 
 	<!-- Video Player -->
-	<com.google.android.exoplayer2.ui.PlayerView
+
+	<com.google.android.exoplayer2.ui.StyledPlayerView
 		android:id="@+id/player_view"
+		show_buffering="when_playing"
+		show_shuffle_button="true"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:background="@android:color/black"
-		tools:context="com.example.ramon.exoplayertest.MainActivity" />
+		drawer:controller_layout_id="@layout/exo_styled_player_control_view"
+		drawer:show_subtitle_button="true" />
 
+
+	<!-- TOOLBAR / ACTIONBAR -->
+	<androidx.appcompat.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:background="@color/video_player_v2_hud"
+		android:theme="@style/ThemeOverlay.AppCompat.Dark"
+		 />
 
 	<!-- Progress bar that will be displayed before a video is loaded -->
 	<ProgressBar
