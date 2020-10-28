@@ -96,6 +96,7 @@ public class GetBulkSubscriptionVideosTask extends AsyncTaskParallel<Void, GetBu
                                         details.setPublishTimestampExact(vid.getPublishTimestampExact());
                                     }
                                     details.setChannel(dbChannel);
+                                    details.setCategoryId(dbChannel.getCategoryId());
                                     detailedList.add(details);
                                 } catch (ExtractionException | IOException e) {
                                     Logger.e(this, "Error during parsing video page for " + vid.getId() + ",msg:" + e.getMessage(), e);
