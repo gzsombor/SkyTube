@@ -46,6 +46,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.media.AudioManagerCompat;
+import androidx.appcompat.app.ActionBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -55,9 +56,7 @@ import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.UnrecognizedInputFormatException;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
@@ -68,7 +67,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import free.rm.skytube.R;
-import free.rm.skytube.app.Debug;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.StreamSelectionPolicy;
@@ -88,7 +86,6 @@ import free.rm.skytube.businessobjects.interfaces.YouTubePlayerFragmentInterface
 import free.rm.skytube.gui.activities.ThumbnailViewerActivity;
 import free.rm.skytube.gui.businessobjects.DatasourceBuilder;
 import free.rm.skytube.gui.businessobjects.MobileNetworkWarningDialog;
-import free.rm.skytube.gui.businessobjects.PlaybackSpeedController;
 import free.rm.skytube.gui.businessobjects.PlayerViewGestureDetector;
 import free.rm.skytube.gui.businessobjects.ResumeVideoTask;
 import free.rm.skytube.gui.businessobjects.SkyTubeMaterialDialog;
@@ -260,13 +257,32 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 		Toolbar toolbar = view.findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setDisplayShowHomeEnabled(true);
+		getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME,
+				ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
 
 		// setup the player
 		playerViewGestureHandler.initView(view);
+		playerView.setControllerVisibilityListener(visibility -> {
+			playerViewGestureHandler.isControllerVisible = (visibility == View.VISIBLE);
+			switch (visibility) {
+				case View.VISIBLE : {
+					showNavigationBar();
+					playerView.getOverlayFrameLayout().setVisibility(View.VISIBLE);
+					toolbar.setVisibility(View.VISIBLE);
+					break;
+				}
+				case View.GONE: {
+					hideNavigationBar();
+					playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					toolbar.setVisibility(View.GONE);
+					break;
+				}
+			}
+		});
+
 		playerView.setOnTouchListener(playerViewGestureHandler);
 		playerView.requestFocus();
+
 
 		setupPlayer();
 		playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);               // ensure that videos are played in their correct aspect ratio
@@ -773,21 +789,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		void initView(View view) {
 			ButterKnife.bind(this, view);
 
-			playerView.setControllerVisibilityListener(visibility -> {
-				isControllerVisible = (visibility == View.VISIBLE);
-				switch (visibility) {
-					case View.VISIBLE : {
-						showNavigationBar();
-						playerView.getOverlayFrameLayout().setVisibility(View.VISIBLE);
-						break;
-					}
-					case View.GONE: {
-						hideNavigationBar();
-						playerView.getOverlayFrameLayout().setVisibility(View.GONE);
-						break;
-					}
-				}
-			});
 
 		}
 
