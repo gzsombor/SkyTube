@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,22 +41,16 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.media.AudioManagerCompat;
+import androidx.appcompat.app.ActionBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.UnrecognizedInputFormatException;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
@@ -87,7 +80,6 @@ import free.rm.skytube.databinding.VideoDescriptionBinding;
 import free.rm.skytube.gui.activities.ThumbnailViewerActivity;
 import free.rm.skytube.gui.businessobjects.DatasourceBuilder;
 import free.rm.skytube.gui.businessobjects.MobileNetworkWarningDialog;
-import free.rm.skytube.gui.businessobjects.PlaybackSpeedController;
 import free.rm.skytube.gui.businessobjects.PlayerViewGestureDetector;
 import free.rm.skytube.gui.businessobjects.ResumeVideoTask;
 import free.rm.skytube.gui.businessobjects.SkyTubeMaterialDialog;
@@ -108,10 +100,11 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 
 	private FragmentYoutubePlayerV2Binding fragmentBinding;
 	private VideoDescriptionBinding videoDescriptionBinding;
-	private TextView playbackSpeedTextView;
 
-	private SimpleExoPlayer player;
-	private long playerInitialPosition = 0;
+	private long playerInitialPosition;
+
+	private SimpleExoPlayer  player;
+
 	private DatasourceBuilder datasourceBuilder;
 
 	private Menu menu = null;
@@ -119,8 +112,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	private CommentsAdapter commentsAdapter = null;
 	private YouTubePlayerActivityListener listener = null;
 	private PlayerViewGestureHandler playerViewGestureHandler;
-
-	private PlaybackSpeedController playbackSpeedController;
 
 	private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -137,7 +128,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		// inflate the layout for this fragment
 		fragmentBinding = FragmentYoutubePlayerV2Binding.inflate(inflater, container, false);
 		videoDescriptionBinding = fragmentBinding.desContent;
-		playbackSpeedTextView = fragmentBinding.getRoot().findViewById(R.id.playbackSpeed);
 
 		// indicate that this fragment has an action bar menu
 		setHasOptionsMenu(true);
@@ -216,14 +206,33 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	 * Initialise the views.
 	 */
 	private void initViews() {
-		// setup the toolbar / actionbar
-		Toolbar toolbar = fragmentBinding.getRoot().findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setDisplayShowHomeEnabled(true);
+        // setup the toolbar / actionbar
+        final Toolbar toolbar = fragmentBinding.toolbar;
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME,
+                ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
 
 		// setup the player
-		playerViewGestureHandler.initView();
+		fragmentBinding.playerView.setControllerVisibilityListener(visibility -> {
+			playerViewGestureHandler.isControllerVisible = (visibility == View.VISIBLE);
+			switch (visibility) {
+				case View.VISIBLE : {
+					showNavigationBar();
+					fragmentBinding.playerView.getOverlayFrameLayout().setVisibility(View.VISIBLE);
+					toolbar.setVisibility(View.VISIBLE);
+					break;
+				}
+				case View.GONE: {
+					hideNavigationBar();
+					if (fragmentBinding != null) {
+						fragmentBinding.playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					}
+					toolbar.setVisibility(View.GONE);
+					break;
+				}
+			}
+		});
+
 		fragmentBinding.playerView.setOnTouchListener(playerViewGestureHandler);
 		fragmentBinding.playerView.requestFocus();
 
@@ -244,8 +253,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 						fragmentBinding.noVideoCommentsTextView);
 			}
 		});
-        this.playbackSpeedController= new PlaybackSpeedController(getContext(),
-				playbackSpeedTextView, player);
 
 		Linker.configure(videoDescriptionBinding.videoDescDescription);
 	}
@@ -260,19 +267,21 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 			}
 			player.addListener(new Player.EventListener() {
 				@Override
-				public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-					Logger.i(this, ">> onPlayerStateChanged " + playWhenReady + " state=" + playbackState);
-					videoIsPlaying = playbackState == Player.STATE_READY && playWhenReady;
+				public void onPlaybackStateChanged(int playbackState) {
+					Logger.i(this, ">> onPlaybackStateChanged state=" + playbackState);
+					boolean playWhenReady = player.getPlayWhenReady();
+					videoIsPlaying = (playbackState == Player.STATE_READY) && playWhenReady;
 
 					if (videoIsPlaying) {
 						preventDeviceSleeping(true);
-						playbackSpeedController.updateMenu();
+						fragmentBinding.playerView.hideController();
 					} else {
 						preventDeviceSleeping(false);
+						fragmentBinding.playerView.showController();
 					}
 
 					if (playbackStateListener != null) {
-						boolean videoIsPaused = playbackState == Player.STATE_READY && !playWhenReady;
+						boolean videoIsPaused = (playbackState == Player.STATE_READY) && !playWhenReady;
 
 						if(videoIsPlaying) {
 							playbackStateListener.started();
@@ -325,20 +334,14 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				}
 			});
 			player.setPlayWhenReady(true);
-			player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);    // ensure that videos are played in their correct aspect ratio
+			player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+			// ensure that videos are played in their correct aspect ratio
 			fragmentBinding.playerView.setPlayer(player);
 		}
 	}
 
 	private SimpleExoPlayer createExoPlayer() {
-		DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-		TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory();
-		DefaultTrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
-		Context context = getContext();
-		DefaultRenderersFactory defaultRenderersFactory = new DefaultRenderersFactory(context);
-
-		return ExoPlayerFactory.newSimpleInstance(getContext(), defaultRenderersFactory, trackSelector, new DefaultLoadControl(), null, bandwidthMeter);
+		return new SimpleExoPlayer.Builder(getContext()).build();
 	}
 
 
@@ -746,21 +749,6 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 		}
 
 		void initView() {
-			fragmentBinding.playerView.setControllerVisibilityListener(visibility -> {
-				isControllerVisible = (visibility == View.VISIBLE);
-				switch (visibility) {
-					case View.VISIBLE : {
-						showNavigationBar();
-						fragmentBinding.playerView.getOverlayFrameLayout().setVisibility(View.VISIBLE);
-						break;
-					}
-					case View.GONE: {
-						hideNavigationBar();
-						fragmentBinding.playerView.getOverlayFrameLayout().setVisibility(View.GONE);
-						break;
-					}
-				}
-			});
 		}
 
 		@Override
