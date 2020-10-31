@@ -99,7 +99,7 @@ dependencies {
     implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:2b4db1b4810bb08bda'
 
     // other modules
-    implementation 'org.ocpsoft.prettytime:prettytime:4.0.5.Final'
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.6.Final'
     implementation 'com.github.moraisigor:slidingdrawer:1.7.1'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
