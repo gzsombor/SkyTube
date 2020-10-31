@@ -16,6 +16,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:background="@android:color/black"
+		drawer:controller_layout_id="@layout/exo_styled_player_control_view"
 		drawer:show_subtitle_button="true" />
 
 
