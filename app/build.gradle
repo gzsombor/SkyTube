@@ -78,6 +78,10 @@ android {
         jumboMode true
     }
     compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+        // Sets Java compatibility to Java 8
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -96,7 +100,7 @@ dependencies {
     }
 
     // implementation 'com.github.TeamNewPipe.NewPipeExtractor:extractor:v0.19.0'
-    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:2b4db1b4810bb08bda'
+    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:ed2cf2ed30cdd691c6'
 
     // other modules
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.6.Final'
@@ -136,6 +140,8 @@ dependencies {
 
     // debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.1'
 
     // proprietary module
     extraImplementation files('libs/YouTubeAndroidPlayerApi.jar')
