@@ -133,7 +133,7 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.core:core:1.3.2'
     implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.multidex:multidex:2.0.1' // as we have over 65536 methods...
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
