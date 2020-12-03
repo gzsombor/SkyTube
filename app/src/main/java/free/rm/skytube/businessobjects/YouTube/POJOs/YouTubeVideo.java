@@ -505,7 +505,7 @@ public class YouTubeVideo extends CardData implements Serializable {
 	 * Remove local copy of this video, and delete it from the VideoDownloads DB.
 	 */
 	public void removeDownload() {
-		Uri uri = DownloadedVideosDb.getVideoDownloadsDb().getVideoFileUri(YouTubeVideo.this);
+		Uri uri = DownloadedVideosDb.getVideoDownloadsDb().getVideoFileUri(YouTubeVideo.this.getId());
 		Log.i("YouTubeVideo", "removeDownload for " + id + " : " + title + " -> " + uri);
 		File file = new File(uri.getPath());
 		if (file.exists()) {
@@ -592,7 +592,7 @@ public class YouTubeVideo extends CardData implements Serializable {
 							.setDescription(getStr(R.string.video) + " ― " + getChannelName())
 							.setOutputFileName(getId() + " - " + getTitle())
 							.setOutputDirectoryName(getChannelName())
-							.setParentDirectory(SkyTubeApp.getSettings().getDownloadFolder(null))
+							.setParentDirectory(settings.getDownloadFolder(null))
 							.setOutputFileExtension(videoStream.getFormat().suffix)
 							.setAllowedOverRoaming(false)
 							.setAllowedNetworkTypesFlags(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
