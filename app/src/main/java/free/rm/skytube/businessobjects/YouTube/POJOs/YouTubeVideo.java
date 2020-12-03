@@ -506,7 +506,7 @@ public class YouTubeVideo extends CardData implements Serializable {
 	 * Remove local copy of this video, and delete it from the VideoDownloads DB.
 	 */
 	public void removeDownload() {
-		Uri uri = DownloadedVideosDb.getVideoDownloadsDb().getVideoFileUri(YouTubeVideo.this);
+		Uri uri = DownloadedVideosDb.getVideoDownloadsDb().getVideoFileUri(YouTubeVideo.this.getId());
 		Log.i("YouTubeVideo", "removeDownload for " + id + " : " + title + " -> " + uri);
 		File file = new File(uri.getPath());
 		if (file.exists()) {
