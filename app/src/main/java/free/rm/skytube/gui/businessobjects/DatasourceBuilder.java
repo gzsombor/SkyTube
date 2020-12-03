@@ -22,10 +22,10 @@ import android.net.Uri;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -47,7 +47,7 @@ public class DatasourceBuilder {
 
     private final DefaultDataSourceFactory dataSourceFactory;
     private final SingleSampleMediaSource.Factory singleSampleSourceFactory;
-    private final ExtractorMediaSource.Factory extMediaSourceFactory;
+    private final ProgressiveMediaSource.Factory extMediaSourceFactory;
 
     public DatasourceBuilder(Context context, ExoPlayer player) {
         this.context = context;
@@ -55,7 +55,7 @@ public class DatasourceBuilder {
         dataSourceFactory =  new DefaultDataSourceFactory(context, "ST. Agent", new DefaultBandwidthMeter());
         singleSampleSourceFactory = new SingleSampleMediaSource.Factory(dataSourceFactory);
 
-        extMediaSourceFactory = new ExtractorMediaSource.Factory(dataSourceFactory);
+        extMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
     }
 
     public void play(Uri videoUri, Uri audioUri) {
@@ -77,9 +77,9 @@ public class DatasourceBuilder {
         MediaFormat format = subtitlesStream.getFormat();
         String language = subtitlesStream.getLocale().getLanguage();
         Logger.i(this, "convert %s -> %s %s", subtitlesStream.getUrl(), format, language);
-        Format exoFormat = Format.createTextSampleFormat(null, format.getMimeType(), C.SELECTION_FLAG_AUTOSELECT, language);
+
         return singleSampleSourceFactory.createMediaSource(
-                Uri.parse(subtitlesStream.getUrl()), exoFormat,
+                new MediaItem.Subtitle(Uri.parse(subtitlesStream.getUrl()), format.getMimeType(), language),
                 C.TIME_UNSET);
     }
 
@@ -98,8 +98,9 @@ public class DatasourceBuilder {
         return sources;
     }
 
-    private ExtractorMediaSource createSource(Uri uri) {
-        return extMediaSourceFactory.createMediaSource(uri);
+    private ProgressiveMediaSource createSource(Uri uri) {
+        MediaItem item = new MediaItem.Builder().setUri(uri).build();
+        return extMediaSourceFactory.createMediaSource(item);
     }
 
     private void preparePlayer(List<MediaSource> sources) {
@@ -108,10 +109,11 @@ public class DatasourceBuilder {
             return;
         }
         if (sources.size() == 1) {
-            player.prepare(sources.get(0));
+            player.setMediaSource(sources.get(0));
         } else {
             MergingMediaSource merged = new MergingMediaSource(sources.toArray(new MediaSource[sources.size()]));
-            player.prepare(merged);
+            player.setMediaSource(merged);
         }
+        player.prepare();
     }
 }

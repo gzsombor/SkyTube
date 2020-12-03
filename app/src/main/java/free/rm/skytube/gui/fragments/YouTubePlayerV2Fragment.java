@@ -55,9 +55,7 @@ import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.UnrecognizedInputFormatException;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
-import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 
@@ -87,7 +85,6 @@ import free.rm.skytube.businessobjects.interfaces.YouTubePlayerFragmentInterface
 import free.rm.skytube.gui.activities.ThumbnailViewerActivity;
 import free.rm.skytube.gui.businessobjects.DatasourceBuilder;
 import free.rm.skytube.gui.businessobjects.MobileNetworkWarningDialog;
-import free.rm.skytube.gui.businessobjects.PlaybackSpeedController;
 import free.rm.skytube.gui.businessobjects.PlayerViewGestureDetector;
 import free.rm.skytube.gui.businessobjects.ResumeVideoTask;
 import free.rm.skytube.gui.businessobjects.SkyTubeMaterialDialog;
@@ -276,7 +273,9 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				}
 				case View.GONE: {
 					hideNavigationBar();
-					playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					if (playerView != null) {
+						playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					}
 					toolbar.setVisibility(View.GONE);
 					break;
 				}
