@@ -273,7 +273,9 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				}
 				case View.GONE: {
 					hideNavigationBar();
-					playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					if (playerView != null) {
+						playerView.getOverlayFrameLayout().setVisibility(View.GONE);
+					}
 					toolbar.setVisibility(View.GONE);
 					break;
 				}
