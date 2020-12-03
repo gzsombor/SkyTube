@@ -38,6 +38,7 @@ import com.google.api.services.youtube.model.VideoStatistics;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.schabi.newpipe.extractor.stream.StreamInfo;
 
 import java.io.File;
 import java.io.Serializable;
@@ -568,7 +569,7 @@ public class YouTubeVideo extends CardData implements Serializable {
 		} else {
 			getDesiredStream(new GetDesiredStreamListener() {
 				@Override
-				public void onGetDesiredStream(StreamMetaData desiredStream) {
+				public void onGetDesiredStream(StreamInfo streamInfo) {
 					// download the video
 					new VideoDownloader()
 							.setRemoteFileUrl(desiredStream.getUri().toString())
@@ -585,8 +586,8 @@ public class YouTubeVideo extends CardData implements Serializable {
 				}
 
 				@Override
-				public void onGetDesiredStreamError(String errorMessage) {
-					Logger.e(YouTubeVideo.this, "Stream error: %s", errorMessage);
+				public void onGetDesiredStreamError(Exception errorMessage) {
+					Logger.e(YouTubeVideo.this, "Stream error: " + errorMessage.getMessage(), errorMessage);
 					Toast.makeText(getContext(),
 							String.format(getContext().getString(R.string.video_download_stream_error), getTitle()),
 							Toast.LENGTH_LONG).show();
