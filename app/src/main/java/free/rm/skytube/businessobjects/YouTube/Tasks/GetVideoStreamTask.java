@@ -22,6 +22,7 @@ import org.schabi.newpipe.extractor.stream.StreamInfo;
 
 import java.io.IOException;
 
+import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.AsyncTaskParallel;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;

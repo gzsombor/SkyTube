@@ -1,11 +1,15 @@
 package free.rm.skytube.app;
 
+import android.content.Context;
+import android.net.Uri;
+
 import org.schabi.newpipe.extractor.stream.AudioStream;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.extractor.stream.VideoStream;
 
 import java.util.Collection;
 
+import free.rm.skytube.R;
 import free.rm.skytube.businessobjects.YouTube.VideoStream.VideoResolution;
 
 public class StreamSelectionPolicy {
@@ -17,6 +21,10 @@ public class StreamSelectionPolicy {
         this.allowVideoOnly = allowVideoOnly;
         this.maxResolution = maxResolution;
         this.minResolution = minResolution;
+    }
+
+    public StreamSelectionPolicy withAllowVideoOnly(boolean newValue) {
+        return new StreamSelectionPolicy(newValue, maxResolution, minResolution);
     }
 
     public StreamSelection select(StreamInfo streamInfo) {
@@ -32,6 +40,18 @@ public class StreamSelectionPolicy {
             }
         }
         return null;
+    }
+
+    public String getErrorMessage(Context context) {
+        String min = "*";
+        String max = "*";
+        if (minResolution != null) {
+            min = minResolution.name();
+        }
+        if (maxResolution != null) {
+            max = maxResolution.name();
+        }
+        return context.getString(R.string.video_stream_not_found_with_request_resolution, min, max);
     }
 
     private AudioStream pickAudio(StreamInfo streamInfo) {
@@ -94,7 +114,7 @@ public class StreamSelectionPolicy {
         }
     }
 
-    static class StreamSelection {
+    public static class StreamSelection {
         final VideoStream videoStream;
         final VideoResolution resolution;
         final AudioStream audioStream;
@@ -107,6 +127,14 @@ public class StreamSelectionPolicy {
 
         public VideoStream getVideoStream() {
             return videoStream;
+        }
+
+        public Uri getVideoStreamUri() {
+            return Uri.parse(videoStream.getUrl());
+        }
+
+        public Uri getAudioStreamUri() {
+            return audioStream != null && audioStream.url != null ? Uri.parse(videoStream.getUrl()) : null;
         }
 
         public VideoResolution getResolution() {

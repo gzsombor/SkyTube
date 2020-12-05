@@ -17,6 +17,7 @@
 
 package free.rm.skytube.gui.fragments;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -53,12 +55,15 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.UnrecognizedInputFormatException;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+
+import org.schabi.newpipe.extractor.stream.StreamInfo;
 
 import java.util.Locale;
 
@@ -68,6 +73,7 @@ import free.rm.skytube.R;
 import free.rm.skytube.app.Debug;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
+import free.rm.skytube.app.StreamSelectionPolicy;
 import free.rm.skytube.app.enums.Policy;
 import free.rm.skytube.businessobjects.GetVideoDetailsTask;
 import free.rm.skytube.businessobjects.Logger;
@@ -101,6 +107,7 @@ import static free.rm.skytube.gui.activities.YouTubePlayerActivity.YOUTUBE_VIDEO
 /**
  * A fragment that holds a standalone YouTube player (version 2).
  */
+@RequiresApi(api = 14)
 public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements YouTubePlayerFragmentInterface {
 
 	private YouTubeVideo		    youTubeVideo = null;
@@ -446,12 +453,12 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				if (downloadStatus.getUri() != null) {
                     loadingVideoView.setVisibility(View.GONE);
                     Logger.i(this, ">> PLAYING LOCALLY: %s", downloadStatus.getUri());
-                    playVideo(downloadStatus.getUri());
+                    playVideo(downloadStatus.getUri(), downloadStatus.getAudioUri());
                     return;
 				} else {
 					youTubeVideo.getDesiredStream(new GetDesiredStreamListener() {
 						@Override
-						public void onGetDesiredStream(StreamMetaData desiredStream) {
+						public void onGetDesiredStream(StreamInfo desiredStream) {
 							// hide the loading video view (progress bar)
 							loadingVideoView.setVisibility(View.GONE);
 
@@ -460,25 +467,22 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 							// before the video streams are retrieved (such action would cause the app
 							// to crash if not catered for...).
 							if (isVisible()) {
-								Logger.i(YouTubePlayerV2Fragment.this, ">> PLAYING: %s", desiredStream.getUri());
-								playVideo(desiredStream.getUri());
+								StreamSelectionPolicy selectionPolicy = SkyTubeApp.getSettings().getDesiredVideoResolution(false);
+								StreamSelectionPolicy.StreamSelection selection = selectionPolicy.select(desiredStream);
+								if (selection != null) {
+									Uri uri = selection.getVideoStreamUri();
+									Logger.i(YouTubePlayerV2Fragment.this, ">> PLAYING: %s", uri);
+									playVideo(uri, selection.getAudioStreamUri());
+								} else {
+									videoPlaybackError(selectionPolicy.getErrorMessage(getContext()));
+								}
 							}
 						}
 
 						@Override
-						public void onGetDesiredStreamError(String errorMessage) {
+						public void onGetDesiredStreamError(Exception errorMessage) {
 							if (errorMessage != null) {
-								Context ctx = getContext();
-								if (ctx == null) {
-									Logger.e(YouTubePlayerV2Fragment.this, "Error during getting stream: %s", errorMessage);
-									return;
-								}
-								new SkyTubeMaterialDialog(ctx)
-										.content(errorMessage)
-										.title(R.string.error_video_play)
-										.cancelable(false)
-										.onPositive((dialog, which) -> closeActivity())
-										.show();
+								videoPlaybackError(errorMessage.getMessage());
 							}
 						}
 					});
@@ -487,6 +491,21 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 				openAsLiveStream();
 			}
 		}
+	}
+
+	private void videoPlaybackError(String errorMessage) {
+		Context ctx = getContext();
+		if (ctx == null) {
+			Logger.e(YouTubePlayerV2Fragment.this, "Error during getting stream: %s", errorMessage);
+			return;
+		}
+		new SkyTubeMaterialDialog(ctx)
+				.content(errorMessage)
+				.title(R.string.error_video_play)
+				.cancelable(false)
+				.onPositive((dialog, which) -> closeActivity())
+				.show();
+
 	}
 
 	private void openAsLiveStream() {
@@ -512,10 +531,10 @@ public class YouTubePlayerV2Fragment extends ImmersiveModeFragment implements Yo
 	 *
 	 * @param videoUri  The Uri of the video that is going to be played.
 	 */
-	private void playVideo(Uri videoUri) {
+	private void playVideo(Uri videoUri, Uri audioUri) {
 		DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(getContext(), "ST. Agent", new DefaultBandwidthMeter());
-		ExtractorMediaSource.Factory extMediaSourceFactory = new ExtractorMediaSource.Factory(dataSourceFactory);
-		ExtractorMediaSource mediaSource = extMediaSourceFactory.createMediaSource(videoUri);
+		ProgressiveMediaSource.Factory extMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+		ProgressiveMediaSource mediaSource = extMediaSourceFactory.createMediaSource(videoUri);
 		player.prepare(mediaSource);
 
 		if (playerInitialPosition > 0)
