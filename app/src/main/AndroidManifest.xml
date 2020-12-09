@@ -47,6 +47,7 @@
             android:theme="@style/VideoPlayerActivityTheme" />
         <activity
             android:name=".gui.activities.PreferencesActivity"
+            android:theme="@style/AppTheme.Preferences"
             android:label="@string/preferences"
             android:parentActivityName=".gui.activities.MainActivity"
             tools:targetApi="jelly_bean">
