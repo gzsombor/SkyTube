@@ -10,8 +10,6 @@
 		<item name="android:popupMenuStyle">@style/PopupMenu</item>
 		<item name="popupMenuStyle">@style/PopupMenu</item>
 
-		<item name="preferenceTheme">@style/AppTheme.Preferences</item>
-
 		<item name="textAppearanceLargePopupMenu">@style/VideoOptionsTextAppearanceLarge</item>
 		<item name="android:textAppearanceLargePopupMenu">@style/VideoOptionsTextAppearanceLarge</item>
 
@@ -19,8 +17,7 @@
 		<item name="android:textAppearanceSmallPopupMenu">@style/VideoOptionsTextAppearanceSmall</item>
 	</style>
 
-
-	<style name="AppTheme.Preferences" parent="PreferenceThemeOverlay">
+	<style name="AppTheme.Preferences" parent="Theme.AppCompat.Light">
 	</style>
 
 	<style name="AppTheme.CustomBackground" parent="AppTheme">
