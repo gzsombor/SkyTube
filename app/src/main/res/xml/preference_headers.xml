@@ -54,6 +54,12 @@
         app:title="@string/pref_other_category" />
 
     <Preference
+        app:fragment="free.rm.skytube.gui.fragments.preferences.ThemePreferenceFragment"
+        app:icon="@drawable/ic_pref_theme"
+        app:key="pref_theme"
+        app:title="@string/pref_theme_category"/>
+
+    <Preference
         app:fragment="free.rm.skytube.gui.fragments.preferences.AboutPreferenceFragment"
         app:icon="@drawable/ic_pref_about"
         app:key="pref_about"
