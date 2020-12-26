@@ -780,9 +780,9 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 				videoView.pause();
 				videoView.stopPlayback();
 				loadingVideoView.setVisibility(View.VISIBLE);
-				if (youTubeVideo.isDownloaded()) {
-					Uri uri = youTubeVideo.getFileUri();
-					File file = new File(uri.getPath());
+				DownloadedVideosDb.Status status = youTubeVideo.getDownloadedFileStatus();
+				if (status != null && status.getLocalVideoFile() != null) {
+					File file = status.getLocalVideoFile();
 					// If the file for this video has gone missing, remove it from the Database and then play remotely.
 					if (!file.exists()) {
 						DownloadedVideosDb.getVideoDownloadsDb().remove(youTubeVideo);
@@ -791,8 +791,8 @@ public class YouTubePlayerV1Fragment extends ImmersiveModeFragment implements Me
 								Toast.LENGTH_LONG).show();
 						loadVideo();
 					} else {
-						Logger.i(YouTubePlayerV1Fragment.this, ">> PLAYING LOCALLY: %s", uri);
-						videoView.setVideoURI(uri);
+						Logger.i(YouTubePlayerV1Fragment.this, ">> PLAYING LOCALLY: %s", file);
+						videoView.setVideoURI(status.getUri());
 					}
 				} else {
 					youTubeVideo.getDesiredStream(new GetDesiredStreamListener() {
