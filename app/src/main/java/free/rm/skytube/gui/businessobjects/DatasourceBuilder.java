@@ -29,6 +29,8 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
+import com.google.android.exoplayer2.upstream.LoadErrorHandlingPolicy;
 
 import org.schabi.newpipe.extractor.MediaFormat;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
@@ -49,13 +51,16 @@ public class DatasourceBuilder {
     private final SingleSampleMediaSource.Factory singleSampleSourceFactory;
     private final ProgressiveMediaSource.Factory extMediaSourceFactory;
 
+    private final static int MINIMUM_LOADABLE_RETRY_COUNT = 10;
+
     public DatasourceBuilder(Context context, ExoPlayer player) {
         this.context = context;
         this.player = player;
         dataSourceFactory =  new DefaultDataSourceFactory(context, "ST. Agent", new DefaultBandwidthMeter.Builder(context).build());
         singleSampleSourceFactory = new SingleSampleMediaSource.Factory(dataSourceFactory);
 
-        extMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
+        extMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory).setLoadErrorHandlingPolicy(
+                new DefaultLoadErrorHandlingPolicy(MINIMUM_LOADABLE_RETRY_COUNT));
     }
 
     public void play(Uri videoUri, Uri audioUri) {
