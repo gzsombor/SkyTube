@@ -52,7 +52,7 @@ public class DatasourceBuilder {
     public DatasourceBuilder(Context context, ExoPlayer player) {
         this.context = context;
         this.player = player;
-        dataSourceFactory =  new DefaultDataSourceFactory(context, "ST. Agent", new DefaultBandwidthMeter());
+        dataSourceFactory =  new DefaultDataSourceFactory(context, "ST. Agent", new DefaultBandwidthMeter.Builder(context).build());
         singleSampleSourceFactory = new SingleSampleMediaSource.Factory(dataSourceFactory);
 
         extMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
