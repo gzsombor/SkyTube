@@ -121,7 +121,7 @@ dependencies {
     }
     implementation 'com.mikepenz:actionitembadge:4.0.0@aar'
     implementation 'com.mikepenz:iconics-core:5.2.1@aar'
-    implementation 'com.mikepenz:iconics-views:5.2.1'
+    implementation 'com.mikepenz:iconics-views:5.2.2'
     implementation 'com.mikepenz:material-design-iconic-typeface:2.2.0.8-kotlin@aar'
 
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
