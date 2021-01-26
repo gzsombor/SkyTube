@@ -186,6 +186,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @return DatabaseResult.SUCCESS if the operation was successful; NOT_MODIFIED or ERROR otherwise.
 	 */
 	public DatabaseResult subscribe(YouTubeChannel channel) {
+		SkyTubeApp.nonUiThread();
 		saveChannelVideos(channel.getYouTubeVideos(), channel.getId());
 
 		return saveSubscription(channel);
@@ -199,6 +200,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @return True if the operation was successful; false otherwise.
 	 */
 	private DatabaseResult saveSubscription(YouTubeChannel channel) {
+		SkyTubeApp.nonUiThread();
+
 		ContentValues values = new ContentValues();
 		values.put(SubscriptionsTable.COL_CHANNEL_ID, channel.getId());
 		values.put(SubscriptionsTable.COL_LAST_VISIT_TIME, channel.getLastVisitTime());
@@ -236,6 +239,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @return True if the operation was successful; false otherwise.
 	 */
 	public DatabaseResult unsubscribe(String channelId) {
+		SkyTubeApp.nonUiThread();
+
 		// delete any feed videos pertaining to this channel
 		getWritableDatabase().delete(SubscriptionsVideosTable.TABLE_NAME,
 				SubscriptionsVideosTable.COL_CHANNEL_ID + " = ?",
@@ -264,6 +269,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @return all the video ids for the subscribed channels from the database.
 	 */
 	public Set<String> getSubscribedChannelVideosByChannel(String channelId) {
+		SkyTubeApp.nonUiThread();
 		try(Cursor cursor = getReadableDatabase().rawQuery(GET_VIDEO_IDS_BY_CHANNEL, new String[] { channelId})) {
 			Set<String> result = new HashSet<>();
 			while(cursor.moveToNext()) {
@@ -278,6 +284,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
      * @return all the video ids for the subscribed channels from the database, mapped to publication times
      */
     public Map<String, Long> getSubscribedChannelVideosByChannelToTimestamp(String channelId) {
+		SkyTubeApp.nonUiThread();
         try(Cursor cursor = getReadableDatabase().rawQuery(GET_VIDEO_IDS_BY_CHANNEL_TO_PUBLISH_TS, new String[] { channelId})) {
             Map<String, Long> result = new HashMap<>();
             while(cursor.moveToNext()) {
@@ -299,6 +306,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
     }
 
 	public List<String> getSubscribedChannelIds() {
+		SkyTubeApp.nonUiThread();
 		try (Cursor cursor = getReadableDatabase().rawQuery("SELECT "+SubscriptionsTable.COL_CHANNEL_ID + " FROM "+SubscriptionsTable.TABLE_NAME,null)) {
 			List<String> result = new ArrayList<>();
 			while(cursor.moveToNext()) {
@@ -316,6 +324,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @throws IOException
 	 */
 	private List<YouTubeChannel> getSubscribedChannels(SQLiteDatabase db) throws IOException {
+		SkyTubeApp.nonUiThread();
+
 		try (Cursor cursor = db.query(SubscriptionsTable.TABLE_NAME,
 				SubscriptionsTable.ALL_COLUMNS,
 				null, null,
@@ -355,6 +365,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	}
 
 	public YouTubeChannel getCachedSubscribedChannel(String channelId) {
+		SkyTubeApp.nonUiThread();
+
 		try (Cursor cursor = getReadableDatabase().query(SubscriptionsTable.TABLE_NAME,
 				SubscriptionsTable.ALL_COLUMNS,
 				SubscriptionsTable.COL_CHANNEL_ID + " = ?", new String[]{channelId},
@@ -398,6 +410,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @throws IOException
 	 */
 	public boolean isUserSubscribedToChannel(String channelId) {
+		SkyTubeApp.nonUiThread();
 	    channelId = Utils.removeChannelIdPrefix(channelId);
 
 		return executeQueryForInteger(IS_SUBSCRIBED_QUERY, new String[]{channelId}, 0) > 0;
@@ -647,6 +660,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
      *                       maintenance queries!
      */
     private List<YouTubeVideo> extractVideos(Cursor cursor, boolean fullColumnList) {
+        SkyTubeApp.nonUiThread();
         List<YouTubeVideo> videos = new ArrayList<>();
         Set<String> invalidIds = new HashSet<>();
         try {

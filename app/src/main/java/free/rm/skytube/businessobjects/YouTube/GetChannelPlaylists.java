@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPI;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeAPIKey;
@@ -67,6 +68,8 @@ public class GetChannelPlaylists {
 	}
 
 	public List<YouTubePlaylist> getNextPlaylists() throws IOException {
+
+		SkyTubeApp.nonUiThread();
 
 		if (!noMorePlaylistPages()) {
 			List<Playlist> playlistList = null;
