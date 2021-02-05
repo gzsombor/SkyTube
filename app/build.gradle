@@ -149,7 +149,7 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.0.9'
 
     // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
 
     // proprietary module
     extraImplementation files('libs/YouTubeAndroidPlayerApi.jar')
