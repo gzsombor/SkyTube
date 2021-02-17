@@ -72,7 +72,6 @@ import free.rm.skytube.gui.fragments.ChannelBrowserFragment;
 import free.rm.skytube.gui.fragments.MainFragment;
 import free.rm.skytube.gui.fragments.PlaylistVideosFragment;
 import free.rm.skytube.gui.fragments.SearchVideoGridFragment;
-import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
 
 /**
  * Main activity (launcher).  This activity holds {@link free.rm.skytube.gui.fragments.VideosGridFragment}.
@@ -127,9 +126,9 @@ public class MainActivity extends BaseActivity {
 			w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 		}
 
-		EventBus.getInstance().addMainActivityListener(this);
+		EventBus.getInstance().registerMainActivityListener(this);
 
-		SkyTubeApp.setFeedUpdateInterval();
+		SkyTubeApp.setFeedUpdateInterval(SkyTubeApp.getSettings().getFeedUpdaterInterval());
 		// Delete any missing downloaded videos
 		new DownloadedVideosDb.RemoveMissingVideosTask().executeInParallel();
 
@@ -602,7 +601,7 @@ public class MainActivity extends BaseActivity {
 	 */
 	@Override
 	public void refreshSubscriptionsFeedVideos() {
-		SubscriptionsFeedFragment.unsetFlag(SubscriptionsFeedFragment.FLAG_REFRESH_FEED_FROM_CACHE);
+		SkyTubeApp.getSettings().setRefreshSubsFeedFromCache(false);
 		MainFragment mainFragment = getMainFragment();
 		if (mainFragment != null) {
 			mainFragment.refreshSubscriptionsFeedVideos();

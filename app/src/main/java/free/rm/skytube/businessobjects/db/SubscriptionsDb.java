@@ -51,7 +51,6 @@ import free.rm.skytube.businessobjects.YouTube.POJOs.Category;
 import free.rm.skytube.businessobjects.YouTube.POJOs.ChannelView;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
-import free.rm.skytube.gui.fragments.SubscriptionsFeedFragment;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -252,7 +251,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 				new String[]{channelId});
 
 		// Need to make sure when we come back to MainActivity, that we refresh the Feed tab so it hides videos from the newly unsubscribed
-		SubscriptionsFeedFragment.setFlag(SubscriptionsFeedFragment.FLAG_REFRESH_FEED_FROM_CACHE);
+		SkyTubeApp.getSettings().setRefreshSubsFeedFromCache(true);
 
 		return (rowsDeleted >= 0) ? DatabaseResult.SUCCESS : DatabaseResult.NOT_MODIFIED;
 	}
@@ -359,7 +358,6 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 							cursor.getLong(colLastCheck),
 							categoryId));
 				} while (cursor.moveToNext());
-
 			}
 			return subsChannels;
 		}
