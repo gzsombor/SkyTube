@@ -533,6 +533,7 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @param channelId the channel id
 	 */
 	public void saveVideos(List<YouTubeVideo> videos, String channelId) {
+		SkyTubeApp.nonUiThread();
 		SQLiteDatabase db = getWritableDatabase();
 		for (YouTubeVideo video : videos) {
 			if (video.getPublishDate() != null) {
@@ -555,6 +556,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	 * @param videos
 	 */
 	public void insertVideosForChannel(List<YouTubeVideo> videos, String channelId) {
+		SkyTubeApp.nonUiThread();
+
 		SQLiteDatabase db = getWritableDatabase();
 		for (YouTubeVideo video : videos) {
 			if (video.getPublishDate() != null) {
@@ -617,6 +620,8 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
      * @return a list of {@link YouTubeVideo}
      */
     private List<YouTubeVideo> getSubscriptionVideoPage(int limit, String videoId, long beforeTimestamp, String sortingColumn) {
+        SkyTubeApp.nonUiThread();
+
         final String selection;
         final String[] selectionArguments;
         if (videoId != null) {
