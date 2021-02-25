@@ -165,6 +165,8 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 				VideosGridFragment fragment = videosPagerAdapter.getFragmentFrom(tab, true);
 				if (fragment != null && fragment.gridView != null) {
 					fragment.gridView.smoothScrollToPosition(TOP_LIST_INDEX);
+				} else {
+					Logger.i(MainFragment.this, "onTabReselected: %s - %s failed fragment is %s", tab.getPosition(), tab.getText(), fragment);
 				}
 			}
 		});
