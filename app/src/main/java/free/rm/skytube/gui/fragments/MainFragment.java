@@ -151,12 +151,10 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 			public void onTabSelected(TabLayout.Tab tab) {
 				viewPager.setCurrentItem(tab.getPosition());
 
-				videosPagerAdapter.notifyTab(tab, true);
 			}
 
 			@Override
 			public void onTabUnselected(TabLayout.Tab tab) {
-				videosPagerAdapter.notifyTab(tab, false);
 			}
 
 			@Override
@@ -243,10 +241,9 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 
 		// when the MainFragment is resumed (e.g. after Preferences is minimized), inform the
 		// current fragment that it is selected.
-		VideosGridFragment selectedFragment = null;
 		if (videosPagerAdapter != null && tabLayout != null) {
 			Logger.d(this, "MAINFRAGMENT RESUMED " + tabLayout.getSelectedTabPosition());
-			selectedFragment = videosPagerAdapter.selectTabAtPosition(tabLayout.getSelectedTabPosition());
+			videosPagerAdapter.selectTabAtPosition(tabLayout.getSelectedTabPosition());
 		}
 		// If the selectedFragment is not the subscriptionsFeedFragment, try out refreshing the subs in the background
 		if (SkyTubeApp.getSettings().isFullRefreshTimely()) {
@@ -308,6 +305,7 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 	public class SimplePagerAdapter extends FragmentPagerAdapter {
 		private final WeaklyReferencedMap<String, VideosGridFragment> instantiatedFragments = new WeaklyReferencedMap<>();
 		private final List<String> visibleTabs = new ArrayList<>();
+		private VideosGridFragment primaryItem;
 
 		public SimplePagerAdapter(FragmentManager fm) {
 			// TODO: Investigate, if we need this
@@ -339,6 +337,22 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 					pager.selectTab(tab);
 				}
 			}
+		}
+
+		@Override
+		public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+			super.setPrimaryItem(container, position, object);
+			if (object != primaryItem) {
+				if (primaryItem != null) {
+					primaryItem.onFragmentUnselected();
+					primaryItem = null;
+				}
+				if (object instanceof VideosGridFragment) {
+					primaryItem = (VideosGridFragment) object;
+					primaryItem.onFragmentSelected();
+				}
+			}
+
 		}
 
 		@Override
@@ -419,17 +433,6 @@ public class MainFragment extends FragmentEx implements FragmentHolder {
 
 		private synchronized VideosGridFragment getFragmentFrom(TabLayout.Tab tab, boolean createIfNotFound) {
 			return getFragmentFrom(tab.getPosition(), createIfNotFound);
-		}
-
-		public synchronized void notifyTab(TabLayout.Tab tab, boolean onSelect) {
-			VideosGridFragment fragment = getFragmentFrom(tab, onSelect);
-			if (fragment != null) {
-				if (onSelect) {
-					fragment.onFragmentSelected();
-				} else {
-					fragment.onFragmentUnselected();
-				}
-			}
 		}
 
 		public synchronized VideosGridFragment selectTabAtPosition(int position) {
