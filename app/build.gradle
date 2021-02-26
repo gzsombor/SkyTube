@@ -119,7 +119,7 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 
     implementation 'com.google.android.exoplayer:exoplayer-core:2.13.1'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.1'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.2'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation ('com.optimaize.languagedetector:language-detector:0.6') {
