@@ -98,11 +98,6 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 	}
 
 	@Override
-	protected void clearDatabaseInstance() {
-		subscriptionsDb = null;
-	}
-
-	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(SubscriptionsTable.getCreateStatement());
 		db.execSQL(SubscriptionsVideosTable.getCreateStatement());
