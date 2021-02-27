@@ -96,7 +96,7 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	 *
 	 * <p>Android's DownloadManager will be used to download the image on our behalf.</p>
 	 */
-	public void download() {
+	private void download() {
 		// check if the mandatory variables were set -- if not halt the program.
 		checkIfVariablesWereSet();
 
@@ -134,9 +134,14 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 		// onComplete.onReceive() will be executed once the file is downloaded
 		getContext().registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
-		// start downloading
-		downloadId = ContextCompat.getSystemService(getContext(), DownloadManager.class).enqueue(request);
-		onFileDownloadStarted();
+        // start downloading
+        try {
+            downloadId = ContextCompat.getSystemService(getContext(), DownloadManager.class).enqueue(request);
+            onFileDownloadStarted();
+        } catch (RuntimeException re) {
+            Logger.e(this, "Download failed:"+re.getMessage(), re);
+            onDownloadStartFailed(title, re);
+        }
 	}
 
 
@@ -354,6 +359,10 @@ public abstract class FileDownloader implements Serializable, PermissionsActivit
 	 */
 	public abstract void onFileDownloadStarted();
 
+    /**
+     * Method called when starting the download failed.
+     */
+    public abstract void onDownloadStartFailed(String downloadName, RuntimeException runtimeException);
 
 	/**
 	 * Method called when the Android's DownloadManager has finished working on the given remote
