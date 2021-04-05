@@ -109,7 +109,7 @@ dependencies {
 
     implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:d761053c45465c3ee3f'
 
-    implementation 'com.github.SkyTubeTeam.components:okhttp-client:0.0.1'
+    implementation ('com.github.SkyTubeTeam.components:okhttp-client:0.0.2') 
 
     // other modules
     implementation 'org.ocpsoft.prettytime:prettytime:5.0.0.Final'
@@ -124,7 +124,7 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 
     implementation 'com.google.android.exoplayer:exoplayer-core:2.13.2'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.2'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.3'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation ('com.optimaize.languagedetector:language-detector:0.6') {
@@ -133,9 +133,9 @@ dependencies {
     }
     implementation 'com.mikepenz:actionitembadge:4.0.0@aar'
 
-    implementation 'com.mikepenz:iconics-core:5.2.4@aar'
-    implementation 'com.mikepenz:iconics-views:5.2.4'
-    implementation 'com.mikepenz:iconics-typeface-api:5.2.4'
+    implementation 'com.mikepenz:iconics-core:5.2.8@aar'
+    implementation 'com.mikepenz:iconics-views:5.2.8'
+    implementation 'com.mikepenz:iconics-typeface-api:5.2.8'
     implementation 'com.mikepenz:material-design-iconic-typeface:2.2.0.8-kotlin@aar'
 
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
