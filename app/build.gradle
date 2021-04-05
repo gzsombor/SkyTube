@@ -104,8 +104,8 @@ dependencies {
         exclude group: 'com.google.http-client', module:'google-http-client-jackson2'
     }
 
-    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:a56daee6b991a63332'
 
+    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:6b663f8ee78d50647d'
     implementation 'com.github.SkyTubeTeam.components:okhttp-client:0.0.1'
 
     // other modules
