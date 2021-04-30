@@ -108,9 +108,8 @@ dependencies {
     }
 
     implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:d761053c45465c3ee3f'
-    implementation ('com.github.SkyTubeTeam.components:okhttp-client:0.0.1') {
-        exclude group: 'com.github.SkyTubeTeam.NewPipeExtractor', module:'extractor'
-    }
+
+    implementation ('com.github.SkyTubeTeam.components:okhttp-client:0.0.2') 
 
     // other modules
     implementation 'org.ocpsoft.prettytime:prettytime:5.0.0.Final'
@@ -125,7 +124,7 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 
     implementation 'com.google.android.exoplayer:exoplayer-core:2.13.2'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.2'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.13.3'
 
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation ('com.optimaize.languagedetector:language-detector:0.6') {
@@ -134,9 +133,9 @@ dependencies {
     }
     implementation 'com.mikepenz:actionitembadge:4.0.0@aar'
 
-    implementation 'com.mikepenz:iconics-core:5.2.4@aar'
-    implementation 'com.mikepenz:iconics-views:5.2.4'
-    implementation 'com.mikepenz:iconics-typeface-api:5.2.4'
+    implementation 'com.mikepenz:iconics-core:5.2.8@aar'
+    implementation 'com.mikepenz:iconics-views:5.2.8'
+    implementation 'com.mikepenz:iconics-typeface-api:5.2.8'
     implementation 'com.mikepenz:material-design-iconic-typeface:2.2.0.8-kotlin@aar'
 
     implementation 'com.github.hedzr:android-file-chooser:v1.2.0-final'
@@ -144,20 +143,20 @@ dependencies {
     // Android support modules
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.core:core:1.3.2'
-    implementation 'androidx.media:media:1.2.1'
+    implementation 'androidx.media:media:1.3.0'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.multidex:multidex:2.0.1' // as we have over 65536 methods...
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
     implementation 'com.github.SkyTubeTeam:RxAndroid:3.0.1.SkyTubeTeam'
-    implementation 'io.reactivex.rxjava3:rxjava:3.0.10'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.12'
 
     // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.6'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     // proprietary module
     extraImplementation files('libs/YouTubeAndroidPlayerApi.jar')
