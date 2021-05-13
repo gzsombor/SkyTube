@@ -167,8 +167,11 @@ dependencies {
         exclude group: 'com.google.http-client', module: 'google-http-client'
         exclude group: 'com.google.http-client', module: 'google-http-client-jackson2'
     }
-    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:d761053c45465c3ee3f'
-    implementation('com.github.SkyTubeTeam.components:okhttp-client:0.0.3')
+    implementation 'com.github.SkyTubeTeam.NewPipeExtractor:extractor:8dbfbdc8b7571329082'
+
+    implementation ('com.github.SkyTubeTeam.components:okhttp-client:0.0.3') {
+        exclude group: 'com.github.SkyTubeTeam.NewPipeExtractor', module: 'extractor' 
+    }
 
     // Java HTML parser
     implementation 'org.jsoup:jsoup:1.13.1'
