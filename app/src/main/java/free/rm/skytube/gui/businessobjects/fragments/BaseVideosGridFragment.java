@@ -60,6 +60,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
         } else {
             this.videoGridAdapter = new VideoGridAdapter();
         }
+        Logger.i(this, "InitBase called, the videoGridAdapter is %s", this.videoGridAdapter);
         videoGridAdapter.setContext(context);
         this.swipeRefreshLayout = swipeRefreshLayoutParam;
         if (isFragmentSelected()) {
