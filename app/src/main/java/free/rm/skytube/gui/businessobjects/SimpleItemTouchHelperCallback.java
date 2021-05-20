@@ -20,6 +20,7 @@ package free.rm.skytube.gui.businessobjects;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.gui.businessobjects.adapters.ItemTouchHelperAdapter;
 
 /**
@@ -34,22 +35,26 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
 	@Override
 	public boolean isLongPressDragEnabled() {
+		Logger.i(this, "isLongPressDragEnabled");
 		return true;
 	}
 
 	@Override
 	public boolean isItemViewSwipeEnabled() {
+		Logger.i(this, "isItemViewSwipeEnabled");
 		return false;
 	}
 
 	@Override
 	public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+		Logger.i(this, "getMovementFlags %s - holder: %s", recyclerView, viewHolder);
 		int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
 		return makeMovementFlags(dragFlags, 0);
 	}
 
 	@Override
 	public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+		Logger.i(this, "onMove %s - holder: %s - target %s", recyclerView, viewHolder, target);
 		adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
 		return true;
 	}

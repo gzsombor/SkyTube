@@ -60,6 +60,7 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
         } else {
             this.videoGridAdapter = new VideoGridAdapter();
         }
+        Logger.i(this, "InitBase called, the videoGridAdapter is %s", this.videoGridAdapter);
         videoGridAdapter.setContext(context);
         this.swipeRefreshLayout = swipeRefreshLayoutParam;
         if (isFragmentSelected()) {
@@ -92,13 +93,14 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 
 	@Override
 	public void onDestroyView() {
-		// Logger.d(this, "onDestroyView " + videoGridAdapter);
+		Logger.i(this, "onDestroyView " + videoGridAdapter);
 		swipeRefreshLayout = null;
 		super.onDestroyView();
 	}
 
 	@Override
 	public void onDestroy() {
+		Logger.i(this, "onDestroy %s", videoGridAdapter);
 		videoGridAdapter.onDestroy();
 		videoGridAdapter = null;
 		super.onDestroy();

@@ -50,6 +50,7 @@ public class BookmarksFragment extends OrderableVideosGridFragment implements Ca
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
         initBookmarks(container.getContext(), new OrderableVideoGridAdapter(BookmarksDb.getBookmarksDb()), FragmentBookmarksBinding.inflate(inflater, container, false));
+        debugDecorations();
         return binding.getRoot();
     }
 
@@ -68,6 +69,8 @@ public class BookmarksFragment extends OrderableVideosGridFragment implements Ca
                 .doOnSuccess(numberOfBookmarks -> {
                     if (numberOfBookmarks > 0 && swipeRefreshLayout != null) {
                         setListVisible(true);
+                        debugDecorations();
+
                         // swipeRefreshLayout.setRefreshing(true);
                     }
                 }).subscribe();
@@ -110,6 +113,7 @@ public class BookmarksFragment extends OrderableVideosGridFragment implements Ca
 
     @Override
     public void onDestroyView() {
+        debugDecorations();
         BookmarksDb.getBookmarksDb().unregisterListener(this);
         binding = null;
         super.onDestroyView();
