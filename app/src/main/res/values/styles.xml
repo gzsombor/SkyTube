@@ -30,6 +30,14 @@
 		<item name="tabTextColor">@color/darkerText</item>
 	</style>
 
+	<style name="AppTheme.FixedTabs" parent="ThemeOverlay.AppCompat.Dark">
+		<item name="android:colorBackground">@color/colorPrimary</item>
+		<item name="android:colorForeground">@color/brightText</item>
+		<item name="android:textColorPrimary">@color/brightText</item>
+		<item name="android:textColorSecondary">@color/darkerText</item>
+
+
+	</style>
 	<!-- *************************************************************************************** -->
 	<!--
 		Main Activity

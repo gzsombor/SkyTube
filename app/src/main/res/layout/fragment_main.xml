@@ -34,7 +34,7 @@
 		<com.google.android.material.appbar.AppBarLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:theme="@style/AppTheme.CustomBackground">
+			android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
 			<!-- TOOLBAR / ACTIONBAR -->
 			<androidx.appcompat.widget.Toolbar
@@ -50,7 +50,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center_horizontal"
-				android:theme="@style/AppTheme.Tabs"
+				android:theme="@style/AppTheme.FixedTabs"
 
 				app:tabMode="scrollable"/>
 
