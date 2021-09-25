@@ -159,7 +159,7 @@ dependencies {
     implementation 'org.ocpsoft.prettytime:prettytime:5.0.1.Final'
 
     // Convert Java objects into JSON and back
-    implementation 'com.google.code.gson:gson:2.8.7'
+    implementation 'com.google.code.gson:gson:2.8.8'
 
     // YouTube modules
     implementation 'com.github.SkyTubeTeam.google-http-java-client:google-http-client-android:1.39.0.1'
