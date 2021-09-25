@@ -148,7 +148,7 @@ dependencies {
     implementation 'com.mikepenz:actionitembadge:4.0.0@aar'
     // Use any icon font or vector as drawable
     implementation 'com.mikepenz:iconics-core:5.2.8@aar'
-    implementation 'com.mikepenz:iconics-views:5.2.8'
+    implementation 'com.mikepenz:iconics-views:5.3.1'
     implementation 'com.mikepenz:iconics-typeface-api:5.2.8'
     // Material Design Iconic Font
     implementation 'com.mikepenz:material-design-iconic-typeface:2.2.0.8-kotlin@aar'
