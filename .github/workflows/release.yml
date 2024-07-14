@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: gradle/wrapper-validation-action@v1
+    - uses: gradle/actions/wrapper-validation@v3
     - name: set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -30,11 +30,32 @@ jobs:
         restore-keys: ${{ runner.os }}-gradle
     - name: Build with Gradle
       run: ./gradlew assembleRelease
+    - name: Sign OSS APK
+      uses: r0adkll/sign-android-release@v1
+      # ID used to access action output
+      id: sign_oss_app
+      with:
+        releaseDirectory: app/build/outputs/apk/oss/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+    - name: Sign Extra APK
+      uses: r0adkll/sign-android-release@v1
+      # ID used to access action output
+      id: sign_extra_app
+      with:
+        releaseDirectory: app/build/outputs/apk/extra/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+  
     - name: Create Github Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "app/build/outputs/apk/oss/release/SkyTube-Oss-*.apk,app/build/outputs/apk/extra/release/SkyTube-Extra-*.apk"
+        artifacts: "${{steps.sign_oss_app.outputs.signedReleaseFile}},${{steps.sign_extra_app.outputs.signedReleaseFile}}"
         draft: "true"
         name: "Version ${{ inputs.version_number }}"
         tag: ${{ inputs.version_number}}
-        
+  
