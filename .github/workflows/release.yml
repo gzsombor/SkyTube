@@ -28,28 +28,14 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: ${{ runner.os }}-gradle
+    - name: Setup Keystore
+      id: setup_keystore
+      uses: timheuer/base64-to-file@v1.2
+      with:
+        fileName: 'release.keystore'
+        encodedString: ${{ secrets.SIGNING_KEY }}    
     - name: Build with Gradle
-      run: ./gradlew assembleRelease
-    - name: Sign OSS APK
-      uses: r0adkll/sign-android-release@v1
-      # ID used to access action output
-      id: sign_oss_app
-      with:
-        releaseDirectory: app/build/outputs/apk/oss/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
-    - name: Sign Extra APK
-      uses: r0adkll/sign-android-release@v1
-      # ID used to access action output
-      id: sign_extra_app
-      with:
-        releaseDirectory: app/build/outputs/apk/extra/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+      run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$${{ steps.setup_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
   
     - name: Create Github Release
       uses: ncipollo/release-action@v1
