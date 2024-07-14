@@ -39,7 +39,7 @@ jobs:
     - name: sha256sum
       run: sha256sum ${{steps.setup_keystore.outputs.filePath}}
     - name: Build with Gradle
-      run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=${{steps.setup_keystore.outputs.filePath}} -Pandroid.injected.signing.store.password=${{secrets.KEY_STORE_PASSWORD}} -Pandroid.injected.signing.key.alias=${{secrets.ALIAS}} -Pandroid.injected.signing.key.password=${{secrets.KEY_PASSWORD}}
+      run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=${{steps.setup_keystore.outputs.filePath}} -Pandroid.injected.signing.store.password=${{secrets.KEY_STORE_PASSWORD}} -Pandroid.injected.signing.key.alias=${{secrets.ALIAS}} -Pandroid.injected.signing.key.passwordX=${{secrets.KEY_PASSWORD}}
   
     - name: Create Github Release
       uses: ncipollo/release-action@v1
