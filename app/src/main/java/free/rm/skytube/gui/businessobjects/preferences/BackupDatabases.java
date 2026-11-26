@@ -102,12 +102,8 @@ public class BackupDatabases {
 		searchHistoryDb.close();
 
 		try (ZipOutput databasesZip = new ZipOutput(backupPath)) {
-			// backup the databases inside a zip file
+			// All the tables live in subs.db now, so that is the only database to back up.
 			databasesZip.addFile(subscriptionsDb.getDatabasePath());
-			databasesZip.addFile(bookmarksDb.getDatabasePath());
-			databasesZip.addFile(playbackDb.getDatabasePath());
-			databasesZip.addFile(channelFilteringDb.getDatabasePath());
-			databasesZip.addFile(searchHistoryDb.getDatabasePath());
 
 			databasesZip.addContent(PREFERENCES_JSON, JsonWriter.string(getImportantKeys()));
 		}
@@ -154,6 +150,11 @@ public class BackupDatabases {
 		ZipFile databasesZip = new ZipFile(new File(backupFilePath));
 		Map<String, ZipFile.JsonFile> result = databasesZip.unzip(databasesDirectory);
 		loadPreferencesFromJson(result);
+
+		// Opening the restored database applies pending migrations. Backups made by older
+		// versions still contain the separate database files: their contents are imported into
+		// subs.db here, so both the new and the old backup formats can be restored.
+		subscriptionsDb.getWritableDatabase();
 	}
 
 	private void loadPreferencesFromJson(Map<String, ZipFile.JsonFile> result) {

@@ -18,15 +18,12 @@
 package free.rm.skytube.businessobjects.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.YouTube.newpipe.ChannelId;
 import free.rm.skytube.gui.businessobjects.MultiSelectListPreferenceItem;
 
@@ -37,33 +34,16 @@ public class ChannelFilteringDb extends SQLiteOpenHelperEx {
 
 	private static volatile ChannelFilteringDb channelFilteringDb = null;
 
-	private static final int DATABASE_VERSION = 1;
-	private static final String DATABASE_NAME = "channelFiltering.db";
-
-
-	private ChannelFilteringDb(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	private ChannelFilteringDb() {
 	}
 
 
 	public static synchronized ChannelFilteringDb getChannelFilteringDb() {
 		if (channelFilteringDb == null) {
-			channelFilteringDb = new ChannelFilteringDb(SkyTubeApp.getContext());
+			channelFilteringDb = new ChannelFilteringDb();
 		}
 		return channelFilteringDb;
 	}
-
-	@Override
-	public void onCreate(SQLiteDatabase sqLiteDatabase) {
-		sqLiteDatabase.execSQL(ChannelListTable.BLACKLIST.getCreateStatement());
-		sqLiteDatabase.execSQL(ChannelListTable.WHITELIST.getCreateStatement());
-	}
-
-
-	@Override
-	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//

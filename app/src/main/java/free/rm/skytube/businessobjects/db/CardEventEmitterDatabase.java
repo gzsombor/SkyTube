@@ -16,9 +16,6 @@
  */
 package free.rm.skytube.businessobjects.db;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-
 import free.rm.skytube.app.utils.WeakList;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.newpipe.ContentId;
@@ -27,10 +24,6 @@ import free.rm.skytube.businessobjects.interfaces.CardListener;
 abstract class CardEventEmitterDatabase extends SQLiteOpenHelperEx {
 
     private final WeakList<CardListener> listeners = new WeakList<>();
-
-    CardEventEmitterDatabase(final Context context, final String name, final SQLiteDatabase.CursorFactory factory, final int version) {
-        super(context, name, factory, version);
-    }
 
     /**
      * Add a Listener that will be notified when a Card is added or removed from the database. This will

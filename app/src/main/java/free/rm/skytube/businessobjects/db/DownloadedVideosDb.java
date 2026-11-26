@@ -3,7 +3,6 @@ package free.rm.skytube.businessobjects.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -125,36 +124,17 @@ public class DownloadedVideosDb extends CardEventEmitterDatabase implements Orde
 
     private static volatile DownloadedVideosDb downloadsDb = null;
 
-    private static final int DATABASE_VERSION = 3;
-    private static final String DATABASE_NAME = "videodownloads.db";
-
     private final JsonSerializer jsonSerializer = new JsonSerializer();
 
     public static synchronized DownloadedVideosDb getVideoDownloadsDb() {
         if (downloadsDb == null) {
-            downloadsDb = new DownloadedVideosDb(SkyTubeApp.getContext());
+            downloadsDb = new DownloadedVideosDb();
         }
 
         return downloadsDb;
     }
 
-    private DownloadedVideosDb(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(DownloadedVideosTable.getCreateStatement());
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 1 && newVersion >= 2) {
-            db.execSQL(DownloadedVideosTable.getAddAudioUriColumn());
-        }
-        if (oldVersion == 2 && newVersion >= 3) {
-            db.execSQL(DownloadedVideosTable.getAddSponsorBlockColumn());
-        }
+    private DownloadedVideosDb() {
     }
 
     /**

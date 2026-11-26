@@ -17,37 +17,54 @@
 
 package free.rm.skytube.businessobjects.db;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 
 import free.rm.skytube.app.SkyTubeApp;
 
 /**
- * An extended {@link SQLiteOpenHelper} with extra goodies.
+ * Base class for all the database facades.
  *
- * <p>Class assumes that sub-classes shall make use of the singleton design pattern.</p>
+ * <p>Every table of the application is stored in the one, shared {@code subs.db} database. The
+ * schema and the migrations are owned by {@link SubscriptionsDb}, so the other helpers only need
+ * to delegate their database access to it. This keeps the existing, table-oriented APIs intact
+ * while ensuring that only one {@link android.database.sqlite.SQLiteOpenHelper} manages the file
+ * (and therefore its version).</p>
  */
-public abstract class SQLiteOpenHelperEx extends SQLiteOpenHelper {
-
-	public SQLiteOpenHelperEx(Context context, String name, android.database.sqlite.SQLiteDatabase.CursorFactory factory, int version) {
-		super(context, name, factory, version);
-	}
+public abstract class SQLiteOpenHelperEx {
 
 	/**
-	 * @return The database (full) path.
+	 * @return The database (full) path of the shared database.
 	 */
 	public String getDatabasePath() {
-		return SkyTubeApp.getContext().getDatabasePath(getDatabaseName()).getPath();
+		return SkyTubeApp.getContext().getDatabasePath(SubscriptionsDb.DATABASE_NAME).getPath();
 	}
 
 
 	/**
-	 * @return The database directory (as a {@link File}).
+	 * @return The directory which contains the shared database (as a {@link File}).
 	 */
 	public File getDatabaseDirectory() {
-		return SkyTubeApp.getContext().getDatabasePath(getDatabaseName()).getParentFile();
+		return SkyTubeApp.getContext().getDatabasePath(SubscriptionsDb.DATABASE_NAME).getParentFile();
 	}
 
+
+	public SQLiteDatabase getReadableDatabase() {
+		return SubscriptionsDb.getSubscriptionsDb().getReadableDatabase();
+	}
+
+
+	public SQLiteDatabase getWritableDatabase() {
+		return SubscriptionsDb.getSubscriptionsDb().getWritableDatabase();
+	}
+
+
+	/**
+	 * Close the shared database. All the facades refer to the same file, so closing any of them
+	 * closes the connection used by all of them.
+	 */
+	public void close() {
+		SubscriptionsDb.getSubscriptionsDb().close();
+	}
 }

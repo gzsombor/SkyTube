@@ -18,7 +18,6 @@
 package free.rm.skytube.businessobjects.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -51,31 +50,18 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class BookmarksDb extends CardEventEmitterDatabase implements OrderableDatabase {
 	private static volatile BookmarksDb bookmarksDb = null;
 
-	private static final int DATABASE_VERSION = 1;
-	private static final String DATABASE_NAME = "bookmarks.db";
     private final JsonSerializer jsonSerializer = new JsonSerializer();
 
-	private BookmarksDb(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	private BookmarksDb() {
 	}
 
 
 	public static synchronized BookmarksDb getBookmarksDb() {
 		if (bookmarksDb == null) {
-			bookmarksDb = new BookmarksDb(SkyTubeApp.getContext());
+			bookmarksDb = new BookmarksDb();
 		}
 
 		return bookmarksDb;
-	}
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(BookmarksTable.getCreateStatement());
-	}
-
-
-	@Override
-	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
 	}
 
 	/**

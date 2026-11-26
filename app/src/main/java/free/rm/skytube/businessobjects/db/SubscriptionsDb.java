@@ -22,9 +22,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.github.skytube.components.utils.SQLiteHelper;
 import com.github.skytube.components.utils.Stopwatch;
+import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -58,7 +60,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 /**
  * A database (DB) that stores user subscriptions (with respect to YouTube channels).
  */
-public class SubscriptionsDb extends SQLiteOpenHelperEx {
+public class SubscriptionsDb extends SQLiteOpenHelper {
     private static final String HAS_VIDEO_QUERY = String.format("SELECT COUNT(*) FROM %s WHERE %s = ?", SubscriptionsVideosTable.TABLE_NAME_V2, SubscriptionsVideosTable.COL_YOUTUBE_VIDEO_ID);
     private static final String GET_VIDEO_IDS_BY_CHANNEL_TO_PUBLISH_TS = String.format("SELECT %s,%s FROM %s WHERE %s = ?",
             SubscriptionsVideosTable.COL_YOUTUBE_VIDEO_ID, SubscriptionsVideosTable.COL_PUBLISH_TIME.name(), SubscriptionsVideosTable.TABLE_NAME_V2, SubscriptionsVideosTable.COL_CHANNEL_ID);
@@ -79,9 +81,15 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 
 	private static volatile SubscriptionsDb subscriptionsDb = null;
 
-    private static final int DATABASE_VERSION = 19;
+    /**
+     * Legacy files whose data was copied into subs.db. They are removed in {@link #onOpen}, i.e.
+     * only after the upgrade transaction has been committed, so a failed upgrade can be retried.
+     */
+    private List<File> legacyFilesToDelete = Collections.emptyList();
 
-    private static final String DATABASE_NAME = "subs.db";
+    private static final int DATABASE_VERSION = 20;
+
+    static final String DATABASE_NAME = "subs.db";
 
     private SubscriptionsDb(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -95,6 +103,29 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
 		return subscriptionsDb;
 	}
 
+	/**
+	 * @return The full path of the shared database.
+	 */
+	public String getDatabasePath() {
+		return SkyTubeApp.getContext().getDatabasePath(DATABASE_NAME).getPath();
+	}
+
+
+	/**
+	 * @return The directory which contains the shared database.
+	 */
+	public File getDatabaseDirectory() {
+		return SkyTubeApp.getContext().getDatabasePath(DATABASE_NAME).getParentFile();
+	}
+
+
+	/**
+	 * Overridable in tests: the directory holding the databases to import.
+	 */
+	File getLegacyDatabasesDirectory() {
+		return getDatabaseDirectory();
+	}
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SubscriptionsTable.getCreateStatement());
@@ -104,6 +135,10 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
         LocalChannelTable.addChannelIdIndex(db);
         db.execSQL(CategoriesTable.getCreateStatement());
         new CategoryManagement(db).setupDefaultCategories();
+        LegacyDatabaseMigration.createConsolidatedTables(db);
+        // Normally the legacy files are imported by onUpgrade (version 19 -> 20). Handle the case
+        // where subs.db is missing as well, e.g. after restoring an incomplete backup.
+        legacyFilesToDelete = LegacyDatabaseMigration.importLegacyDatabases(db, getLegacyDatabasesDirectory());
     }
 
 	@Override
@@ -180,6 +215,21 @@ public class SubscriptionsDb extends SQLiteOpenHelperEx {
         }
         if (upgrade.executeStep(19)) {
             makeSubsIdMandatory(db);
+        }
+        if (upgrade.executeStep(20)) {
+            // Version 20 moves every table into subs.db. Import the data of the old, separate
+            // databases (including backups which still contain them) into their new home.
+            legacyFilesToDelete = LegacyDatabaseMigration.importLegacyDatabases(db, getLegacyDatabasesDirectory());
+        }
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        // SQLiteOpenHelper calls onOpen after onCreate/onUpgrade and after the transaction that
+        // wraps them has been committed. Only now is it safe to discard the legacy files.
+        if (!legacyFilesToDelete.isEmpty()) {
+            LegacyDatabaseMigration.deleteImportedFiles(legacyFilesToDelete);
+            legacyFilesToDelete = Collections.emptyList();
         }
     }
 

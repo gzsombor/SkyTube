@@ -1,7 +1,6 @@
 package free.rm.skytube.businessobjects.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -29,22 +28,19 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 	private static volatile PlaybackStatusDb playbackStatusDb = null;
 	private static HashMap<String, VideoWatchedStatus> playbackHistoryMap = null;
 
-	private static final int DATABASE_VERSION = 1;
 	private int updateCounter = 0;
-	private static final String DATABASE_NAME = "playbackhistory.db";
 
 	private final Set<VideoPlayStatusUpdateListener> listeners = new HashSet<>();
 
 	public static synchronized PlaybackStatusDb getPlaybackStatusDb() {
 		if (playbackStatusDb == null) {
-			playbackStatusDb = new PlaybackStatusDb(SkyTubeApp.getContext());
+			playbackStatusDb = new PlaybackStatusDb();
 		}
 
 		return playbackStatusDb;
 	}
 
-	private PlaybackStatusDb(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	private PlaybackStatusDb() {
 	}
 
 	public void deleteAllPlaybackHistory() {
@@ -52,16 +48,6 @@ public class PlaybackStatusDb extends SQLiteOpenHelperEx {
 		playbackHistoryMap = null;
 		updateCounter++;
 		onUpdated(null);
-	}
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(PlaybackStatusTable.getCreateStatement());
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
 	}
 
 	/**

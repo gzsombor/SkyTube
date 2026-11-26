@@ -1,17 +1,10 @@
 package free.rm.skytube.businessobjects.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.Logger;
@@ -29,68 +22,19 @@ public class SearchHistoryDb extends SQLiteOpenHelperEx {
 	public static final String[] SEARCH_HISTORY_COLUMNS = {SearchHistoryTable.COL_SEARCH_ID, SearchHistoryTable.COL_SEARCH_TEXT};
 	private static volatile SearchHistoryDb searchHistoryDb = null;
 
-	private static final int DATABASE_VERSION = 2;
-	private static final String DATABASE_NAME = "searchHistory.db";
-
 	private static final String UPDATE_SEARCH_TEXT_TIMESTAMP = String.format("UPDATE %s SET %s = datetime('now','localtime') WHERE %s = ?", SearchHistoryTable.TABLE_NAME, SearchHistoryTable.COL_SEARCH_DATE, SearchHistoryTable.COL_SEARCH_TEXT);
 
 
-	private SearchHistoryDb(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+	private SearchHistoryDb() {
 	}
 
 
 	public static synchronized SearchHistoryDb getSearchHistoryDb() {
 		if (searchHistoryDb == null) {
-			searchHistoryDb = new SearchHistoryDb(SkyTubeApp.getContext());
+			searchHistoryDb = new SearchHistoryDb();
 		}
 
 		return searchHistoryDb;
-	}
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(SearchHistoryTable.getCreateStatement());
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-	    // Version 2 introduced the date the search term was searched for. If the user already has version 1,
-        // grab all the values from the database, recreate it with the new column, and add the search terms back in.
-        // The current timestamp will be used.
-		if(oldVersion == 1 && newVersion == 2) {
-			try (Cursor cursor = db.query(SearchHistoryTable.TABLE_NAME,
-					new String[] {SearchHistoryTable.COL_SEARCH_ID, SearchHistoryTable.COL_SEARCH_TEXT},
-					null,
-					null,
-					null,
-					null,
-					SearchHistoryTable.COL_SEARCH_ID + " ASC")) {
-                List<Map<Integer, String>> history = new ArrayList<>();
-                if (cursor.moveToFirst()) {
-                    final int searchIdIdx = cursor.getColumnIndexOrThrow(SearchHistoryTable.COL_SEARCH_ID);
-                    final int searchTxtIdx = cursor.getColumnIndexOrThrow(SearchHistoryTable.COL_SEARCH_TEXT);
-                    do {
-                        int id = cursor.getInt(searchIdIdx);
-                        String text = cursor.getString(searchTxtIdx);
-                        history.add(new HashMap<Integer, String>() {{
-                            put(id, text);
-                        }});
-                    } while (cursor.moveToNext());
-                    db.execSQL("DROP TABLE " + SearchHistoryTable.TABLE_NAME);
-                    onCreate(db);
-                    for (Map<Integer, String> entry : history) {
-                        for (Map.Entry<Integer, String> e : entry.entrySet()) {
-                            String text = e.getValue();
-                            ContentValues values = new ContentValues();
-                            values.put(SearchHistoryTable.COL_SEARCH_ID, e.getKey());
-                            values.put(SearchHistoryTable.COL_SEARCH_TEXT, text);
-                            db.insert(SearchHistoryTable.TABLE_NAME, null, values);
-                        }
-                    }
-                }
-            }
-		}
 	}
 
 	/**
