@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="filter_menu_title">Filter feed</string>
+    <string name="filter_drawer_title">Filter videos</string>
+    <string name="filter_no_matches">No videos match the current filters. Change or reset the filters in the side panel.</string>
+    <string name="filter_published_before">Published before date</string>
+    <string name="filter_any_date">Any date</string>
+    <string name="filter_unwatched_only">Unwatched videos only</string>
+    <string name="filter_partially_watched_only">Partially watched only</string>
+    <string name="filter_duration">Video duration</string>
+    <string name="filter_any_duration">Any</string>
+    <string name="filter_shorter_than">Shorter than</string>
+    <string name="filter_longer_than">Longer than</string>
+    <string-array name="filter_duration_options">
+        <item>@string/filter_any_duration</item>
+        <item>1 min</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>4 hours</item>
+    </string-array>
+    <integer-array name="filter_duration_values">
+        <item>0</item>
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>240</item>
+    </integer-array>
+    <string name="filter_title_contains">Title contains</string>
+    <string name="filter_reset">Reset</string>
+    <string name="filter_reset_filters">Reset filters</string>
+    <string name="filter_show_filters">Show filters</string>
+</resources>

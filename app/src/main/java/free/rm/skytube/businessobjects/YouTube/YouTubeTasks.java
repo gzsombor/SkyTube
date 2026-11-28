@@ -32,6 +32,7 @@ import free.rm.skytube.R;
 import free.rm.skytube.app.EventBus;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.Utils;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.VideoCategory;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.PersistentChannel;
@@ -65,6 +66,7 @@ import static free.rm.skytube.app.SkyTubeApp.getContext;
  */
 public class YouTubeTasks {
     private static final String TAG = YouTubeTasks.class.getSimpleName();
+    private static final int VIDEO_PAGE_SIZE = 20;
     private static final Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(4));
 
     public interface ChannelPlaylistFetcher {
@@ -405,11 +407,13 @@ public class YouTubeTasks {
      * @param videoGridAdapter The grid adapter the videos will be added to.
      * @param swipeRefreshLayout The layout which shows animation about the refresh process.
      * @param clearList Clear the list before adding new values to it.
+     * @param requestId Id of the adapter request, used to discard results from superseded requests.
      */
     public static Maybe<List<CardData>> getYouTubeVideos(@NonNull GetYouTubeVideos getYouTubeVideos,
                                                          @NonNull VideoGridAdapter videoGridAdapter,
                                                          @Nullable SwipeRefreshLayout swipeRefreshLayout,
-                                                         boolean clearList) {
+                                                         boolean clearList,
+                                                          long requestId) {
         getYouTubeVideos.resetKey();
         final YouTubeChannel channel = videoGridAdapter.getYouTubeChannel();
         final Context context = videoGridAdapter.getContext();
@@ -417,50 +421,42 @@ public class YouTubeTasks {
             swipeRefreshLayout.setRefreshing(true);
         }
         final boolean subscriptionFeedVideos = videoGridAdapter.getCurrentVideoCategory() == VideoCategory.SUBSCRIPTIONS_FEED_VIDEOS;
+        final boolean feedFilteringEnabled = videoGridAdapter.getCurrentVideoCategory().isFeedFilteringEnabled();
 
         return Maybe.fromCallable(() -> {
-            // get videos from YouTube or the database.
-            final List<CardData> videosList;
+            final List<CardData> filteredVideos = new ArrayList<>();
+            final int targetSize = clearList && subscriptionFeedVideos
+                    ? Math.max(videoGridAdapter.getItemCount(), VIDEO_PAGE_SIZE)
+                    : VIDEO_PAGE_SIZE;
 
-            if (clearList && subscriptionFeedVideos) {
-                final int currentSize = videoGridAdapter.getItemCount();
-                List<CardData> result = new ArrayList<>(currentSize);
-                boolean hasNew;
-                do {
-                    final List<CardData> nextVideos = getYouTubeVideos.getNextVideos();
-                    hasNew = !nextVideos.isEmpty();
-                    result.addAll(nextVideos);
-                } while(result.size() < currentSize && hasNew);
-                videosList = result;
-            } else {
-                videosList = getYouTubeVideos.getNextVideos();
-            }
+            // The fetcher/data source returns only videos which belong in the feed: the database
+            // applies the feed filters in SQL before paging, and network sources filter their own
+            // results.  VideoBlocker is still applied here because it is a global channel filter.
+            while (filteredVideos.size() < targetSize && !getYouTubeVideos.noMoreVideoPages()) {
+                final List<CardData> videos = getYouTubeVideos.getNextVideos();
+                if (videos == null || videos.isEmpty()) {
+                    break;
+                }
 
-            if (videosList != null) {
-                // filter videos
-                final List<CardData> filteredVideos;
+                List<CardData> page = videos;
                 if (videoGridAdapter.getCurrentVideoCategory().isVideoFilteringEnabled()) {
-                    filteredVideos = new VideoBlocker().filter(videosList);
-                } else {
-                    filteredVideos = videosList;
+                    page = new VideoBlocker().filter(page);
                 }
-
-                // This is not used for subscriptionFeedVideos
-                if (channel != null && channel.isUserSubscribed()) {
-                    for (CardData video : filteredVideos) {
-                        if (video instanceof YouTubeVideo) {
-                            channel.addYouTubeVideo((YouTubeVideo) video);
-                        }
-                    }
-                    SubscriptionsDb db = SubscriptionsDb.getSubscriptionsDb();
-                    PersistentChannel persistentChannel = db.getCachedChannel(channel.getChannelId());
-                    db.saveChannelVideos(channel.getYouTubeVideos(), persistentChannel, false);
-                }
-                return filteredVideos;
-            } else {
-                return Collections.<CardData>emptyList();
+                filteredVideos.addAll(page);
             }
 
+            // This is not used for subscriptionFeedVideos
+            if (channel != null && channel.isUserSubscribed()) {
+                for (CardData video : filteredVideos) {
+                    if (video instanceof YouTubeVideo) {
+                        channel.addYouTubeVideo((YouTubeVideo) video);
+                    }
+                }
+                SubscriptionsDb db = SubscriptionsDb.getSubscriptionsDb();
+                PersistentChannel persistentChannel = db.getCachedChannel(channel.getChannelId());
+                db.saveChannelVideos(channel.getYouTubeVideos(), persistentChannel, false);
+            }
+            return filteredVideos;
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -471,6 +467,12 @@ public class YouTubeTasks {
                 .doOnSuccess(videosList -> {
                     SkyTubeApp.notifyUserOnError(context, getYouTubeVideos.getLastException());
 
+                    if (requestId != videoGridAdapter.getRefreshId()) {
+                        // A newer refresh has been started (e.g. after a filter change) - discard
+                        // these results so they cannot overwrite the newer ones.
+                        return;
+                    }
+
                     if (videosList.isEmpty()) {
                         Log.w(TAG, "getYouTubeVideos returned empty list for category=" + videoGridAdapter.getCurrentVideoCategory());
                     }
@@ -479,7 +481,11 @@ public class YouTubeTasks {
                         videoGridAdapter.clearList();
                     }
                     videoGridAdapter.appendList(videosList);
-                    videoGridAdapter.notifyVideoGridUpdated();
+                    // Only a full refresh can establish that the whole feed was filtered out.  An
+                    // empty "load more" page just means there are no further videos to append.
+                    final boolean videosFilteredOut = clearList && feedFilteringEnabled
+                            && FeedFilter.getInstance().isActive() && videosList.isEmpty();
+                    videoGridAdapter.notifyVideoGridUpdated(videosFilteredOut);
                 })
                 .doOnTerminate(() -> {
                     if(swipeRefreshLayout != null) {

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import free.rm.skytube.app.Utils;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
 import free.rm.skytube.businessobjects.db.BookmarksDb;
@@ -32,6 +33,8 @@ import free.rm.skytube.businessobjects.db.BookmarksDb;
  * Get user's bookmarked videos.
  */
 public class GetBookmarksVideos extends GetYouTubeVideos {
+    private static final int PAGE_SIZE = 20;
+
     private Integer minOrder;
 
     @Override
@@ -47,19 +50,20 @@ public class GetBookmarksVideos extends GetYouTubeVideos {
 
     @Override
     public List<CardData> getNextVideos() {
-        if (!noMoreVideoPages()) {
-            BookmarksDb db = BookmarksDb.getBookmarksDb();
-            Pair<List<YouTubeVideo>, Integer> bookmarkedVideos = db.getBookmarkedVideos(20, minOrder);
-            if (!bookmarkedVideos.first.isEmpty()) {
-                minOrder = Utils.min(bookmarkedVideos.second, minOrder);
-                noMoreVideoPages = bookmarkedVideos.first.isEmpty();
-            } else {
-                noMoreVideoPages = true;
-            }
-            return new ArrayList<>(bookmarkedVideos.first);
+        if (noMoreVideoPages()) {
+            return null;
         }
 
-        return null;
+        // The filters are applied by BookmarksDb in SQL, before the page limit.
+        final BookmarksDb db = BookmarksDb.getBookmarksDb();
+        final Pair<List<YouTubeVideo>, Integer> bookmarkedVideos =
+                db.getBookmarkedVideos(PAGE_SIZE, minOrder, FeedFilter.getInstance());
+        if (bookmarkedVideos.first.isEmpty()) {
+            noMoreVideoPages = true;
+        } else {
+            minOrder = Utils.min(bookmarkedVideos.second, minOrder);
+        }
+        return new ArrayList<>(bookmarkedVideos.first);
     }
 
 }

@@ -61,6 +61,8 @@ public class SubscriptionsFeedFragment extends VideosGridFragment implements Get
 
     private FragmentSubsFeedBinding binding;
 
+    private boolean hasChannels = false;
+
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
@@ -84,7 +86,18 @@ public class SubscriptionsFeedFragment extends VideosGridFragment implements Get
         binding.importSubscriptionsButton.setOnClickListener(v -> subscriptionsBackupsManager
                 .displayImportSubscriptionsFromYouTubeDialog());
         binding.importBackupButton.setOnClickListener(v -> subscriptionsBackupsManager.displayFilePicker());
-        videoGridAdapter.setVideoGridUpdated(this::setupUiAccordingToNumOfSubbedChannels);
+        binding.resetFiltersButton.setOnClickListener(v -> {
+            if (getParentFragment() instanceof MainFragment) {
+                ((MainFragment) getParentFragment()).resetFeedFilters();
+            }
+        });
+        binding.showFiltersButton.setOnClickListener(v -> {
+            if (getParentFragment() instanceof MainFragment) {
+                ((MainFragment) getParentFragment()).showFilterDrawer();
+            }
+        });
+        videoGridAdapter.setVideoGridUpdated((hasItems, videosFilteredOut) ->
+                setupUiAccordingToNumOfSubbedChannels(hasItems, videosFilteredOut));
         // get the previously published videos currently cached in the database
         videoGridAdapter.setVideoCategory(VideoCategory.SUBSCRIPTIONS_FEED_VIDEOS);
     }
@@ -143,7 +156,8 @@ public class SubscriptionsFeedFragment extends VideosGridFragment implements Get
 
     @Override
     public void onChannelsFound(boolean hasChannels) {
-        setupUiAccordingToNumOfSubbedChannels(hasChannels);
+        this.hasChannels = hasChannels;
+        setupUiAccordingToNumOfSubbedChannels(hasChannels, false);
     }
 
     @Override
@@ -188,20 +202,25 @@ public class SubscriptionsFeedFragment extends VideosGridFragment implements Get
     }
 
     /**
-     * Set up the UI depending to the total number of channel the user is subscribed to.
+     * Set up the UI according to the videos which are available in the feed.
      *
-     * @param hasChannels   If the user has already subscribed to at least one channel.
+     * @param hasItems          If there is at least one video to display.
+     * @param videosFilteredOut If the active feed filters removed every video from the feed.
      */
-    private void setupUiAccordingToNumOfSubbedChannels(boolean hasChannels) {
+    private void setupUiAccordingToNumOfSubbedChannels(boolean hasItems, boolean videosFilteredOut) {
         final SwipeRefreshLayout swipeRefreshLayout = gridviewBinding.swipeRefreshLayout;
-        if (hasChannels) {
-            if (swipeRefreshLayout.getVisibility() != View.VISIBLE) {
-                swipeRefreshLayout.setVisibility(View.VISIBLE);
-                binding.noSubscriptionsText.setVisibility(View.GONE);
-            }
+        if (videosFilteredOut && hasChannels) {
+            swipeRefreshLayout.setVisibility(View.GONE);
+            binding.noSubscriptionsText.setVisibility(View.GONE);
+            binding.noFilteredVideosText.setVisibility(View.VISIBLE);
+        } else if (hasItems) {
+            swipeRefreshLayout.setVisibility(View.VISIBLE);
+            binding.noSubscriptionsText.setVisibility(View.GONE);
+            binding.noFilteredVideosText.setVisibility(View.GONE);
         } else {
             swipeRefreshLayout.setVisibility(View.GONE);
             binding.noSubscriptionsText.setVisibility(View.VISIBLE);
+            binding.noFilteredVideosText.setVisibility(View.GONE);
         }
     }
 

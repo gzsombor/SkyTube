@@ -3,6 +3,7 @@ package free.rm.skytube.businessobjects.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +21,7 @@ import free.rm.skytube.R;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.businessobjects.AsyncTaskParallel;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.JsonSerializer;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.Sponsorblock.SBTasks;
@@ -138,13 +140,82 @@ public class DownloadedVideosDb extends CardEventEmitterDatabase implements Orde
     }
 
     /**
-     * Get the list of Videos that have been downloaded.
-     *
-     * @return List of Videos
+     * Get downloaded videos which match the active feed filters.  The filters are part of the SQL
+     * query, so they are applied by the database rather than to an already loaded list.
      */
-    public List<YouTubeVideo> getDownloadedVideos() {
+    public List<YouTubeVideo> getDownloadedVideos(FeedFilter feedFilter) {
         SkyTubeApp.nonUiThread();
-        return getDownloadedVideos(DownloadedVideosTable.COL_ORDER + " DESC");
+
+        final Query query = buildDownloadedVideosQuery(feedFilter);
+        try (Cursor cursor = getReadableDatabase().rawQuery(query.sql, query.args)) {
+            List<YouTubeVideo> videos = new ArrayList<>();
+
+            if (cursor.moveToNext()) {
+                final int videoIdx = cursor.getColumnIndexOrThrow(DownloadedVideosTable.COL_YOUTUBE_VIDEO);
+                do {
+                    final byte[] blob = cursor.getBlob(videoIdx);
+                    videos.add(jsonSerializer.fromPersistedVideoJson(blob).updatePublishTimestampFromDate());
+                } while (cursor.moveToNext());
+            }
+            return videos;
+        }
+    }
+
+    static Query buildDownloadedVideosQuery(FeedFilter feedFilter) {
+        final List<String> args = new ArrayList<>();
+        final String conditions = feedFilter == null ? "" : feedFilter.buildSqlWhere("d", args);
+        final String selection = conditions.isEmpty() ? "" : " WHERE (" + conditions + ")";
+        final String sql = String.format("SELECT d.%1$s,d.%2$s FROM %3$s d%4$s ORDER BY d.%2$s DESC",
+                DownloadedVideosTable.COL_YOUTUBE_VIDEO, DownloadedVideosTable.COL_ORDER,
+                DownloadedVideosTable.TABLE_NAME, selection);
+        return new Query(sql, args.toArray(new String[0]));
+    }
+
+    static final class Query {
+        final String sql;
+        final String[] args;
+
+        private Query(String sql, String[] args) {
+            this.sql = sql;
+            this.args = args;
+        }
+    }
+
+    private static void putFilterValues(ContentValues values, YouTubeVideo video) {
+        video.updatePublishTimestampFromDate();
+        if (video.getTitle() == null) {
+            values.putNull(DownloadedVideosTable.COL_TITLE.name());
+        } else {
+            values.put(DownloadedVideosTable.COL_TITLE.name(), video.getTitle());
+        }
+        values.put(DownloadedVideosTable.COL_DURATION.name(), video.getDurationInSeconds());
+        final Long publishTimestamp = video.getPublishTimestamp();
+        values.put(DownloadedVideosTable.COL_PUBLISH_TIME.name(), publishTimestamp == null ? 0L : publishTimestamp);
+    }
+
+    /**
+     * Fill the flat filter columns for downloads which were stored before those columns existed.
+     */
+    static void populateFilterColumns(SQLiteDatabase db) {
+        final JsonSerializer serializer = new JsonSerializer();
+        final String query = String.format("SELECT %1$s,%2$s FROM %3$s",
+                DownloadedVideosTable.COL_YOUTUBE_VIDEO_ID, DownloadedVideosTable.COL_YOUTUBE_VIDEO,
+                DownloadedVideosTable.TABLE_NAME);
+        try (Cursor cursor = db.rawQuery(query, null)) {
+            final int idIdx = cursor.getColumnIndexOrThrow(DownloadedVideosTable.COL_YOUTUBE_VIDEO_ID);
+            final int videoIdx = cursor.getColumnIndexOrThrow(DownloadedVideosTable.COL_YOUTUBE_VIDEO);
+            while (cursor.moveToNext()) {
+                final YouTubeVideo video = serializer.fromPersistedVideoJson(cursor.getBlob(videoIdx));
+                if (video == null) {
+                    continue;
+                }
+                final ContentValues values = new ContentValues();
+                putFilterValues(values, video);
+                db.update(DownloadedVideosTable.TABLE_NAME, values,
+                        DownloadedVideosTable.COL_YOUTUBE_VIDEO_ID + " = ?",
+                        new String[]{cursor.getString(idIdx)});
+            }
+        }
     }
 
     /**
@@ -196,38 +267,12 @@ public class DownloadedVideosDb extends CardEventEmitterDatabase implements Orde
         }
     }
 
-    /**
-     * Get the list of Videos that have been downloaded in the given order.
-     *
-     * @return List of Videos
-     */
-    private List<YouTubeVideo> getDownloadedVideos(String ordering) {
-        try (Cursor cursor = getReadableDatabase().query(
-                DownloadedVideosTable.TABLE_NAME,
-                new String[]{DownloadedVideosTable.COL_YOUTUBE_VIDEO, DownloadedVideosTable.COL_FILE_URI},
-                null,
-                null, null, null, ordering)) {
-            List<YouTubeVideo> videos = new ArrayList<>();
-
-            if (cursor.moveToNext()) {
-                do {
-                    final byte[] blob = cursor.getBlob(cursor.getColumnIndex(DownloadedVideosTable.COL_YOUTUBE_VIDEO));
-
-                    // convert JSON into YouTubeVideo
-                    YouTubeVideo video = jsonSerializer.fromPersistedVideoJson(blob);
-
-                    videos.add(video);
-                } while (cursor.moveToNext());
-            }
-            return videos;
-        }
-    }
-
     public Single<Boolean> add(YouTubeVideo video, Uri fileUri, Uri audioUri) {
         return Single.fromCallable(() -> {
 
                     ContentValues values = new ContentValues();
                     values.put(DownloadedVideosTable.COL_YOUTUBE_VIDEO_ID, video.getId());
+                    putFilterValues(values, video);
                     values.put(DownloadedVideosTable.COL_YOUTUBE_VIDEO, jsonSerializer.toPersistedVideoJson(video).getBytes());
                     if (fileUri != null) {
                         values.put(DownloadedVideosTable.COL_FILE_URI, fileUri.toString());

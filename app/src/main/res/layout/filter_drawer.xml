@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/filter_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/subs_drawer_background"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/filter_drawer_title"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:text="@string/filter_drawer_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        style="@style/SubsTextView" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/filter_published_before_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_published_before"
+                android:textStyle="bold"
+                style="@style/SubsTextView" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/filter_date_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/filter_any_date"
+                    tools:text="Nov 28, 2026" />
+
+                <Button
+                    android:id="@+id/filter_clear_date_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/clear"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/filter_unwatched_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_unwatched_only"
+                android:textColor="@color/subs_text" />
+
+            <CheckBox
+                android:id="@+id/filter_partially_watched_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_partially_watched_only"
+                android:textColor="@color/subs_text" />
+
+            <TextView
+                android:id="@+id/filter_duration_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/filter_duration"
+                android:textStyle="bold"
+                style="@style/SubsTextView" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/filter_shorter_than"
+                style="@style/SubsTextView" />
+
+            <Spinner
+                android:id="@+id/filter_shorter_than_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/filter_duration_options" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/filter_longer_than"
+                style="@style/SubsTextView" />
+
+            <Spinner
+                android:id="@+id/filter_longer_than_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/filter_duration_options" />
+
+            <EditText
+                android:id="@+id/filter_title_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/filter_title_contains"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textColor="@color/subs_text"
+                android:textColorHint="@color/subs_text" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/filter_reset_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_reset" />
+
+    </LinearLayout>
+
+</LinearLayout>

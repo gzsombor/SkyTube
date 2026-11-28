@@ -1,13 +1,18 @@
 package free.rm.skytube.gui.fragments;
 
+import android.app.DatePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +21,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -24,8 +30,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import free.rm.skytube.R;
@@ -33,8 +44,10 @@ import free.rm.skytube.app.EventBus;
 import free.rm.skytube.app.FeedUpdateTask;
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.utils.WeaklyReferencedMap;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.newpipe.ChannelId;
+import free.rm.skytube.databinding.FilterDrawerBinding;
 import free.rm.skytube.databinding.FragmentMainBinding;
 import free.rm.skytube.databinding.SubsDrawerBinding;
 import free.rm.skytube.gui.activities.BaseActivity;
@@ -51,9 +64,31 @@ public class MainFragment extends FragmentEx {
 	public static final String SHOULD_SELECTED_FEED_TAB = "MainFragment.SHOULD_SELECTED_FEED_TAB";
 
 	private static final int TOP_LIST_INDEX = 0;
+	private static final long FILTER_DEBOUNCE_MS = 500;
 
 	private FragmentMainBinding fragmentBinding;
 	private SubsDrawerBinding subsDrawerBinding;
+	private FilterDrawerBinding filterDrawerBinding;
+	private DrawerLayout.DrawerListener filterDrawerListener;
+	private Runnable filterApplyRunnable;
+	private final TextWatcher filterTextWatcher = new TextWatcher() {
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+		}
+
+		@Override
+		public void afterTextChanged(Editable s) {
+			scheduleFilterApply();
+		}
+	};
+	private boolean syncingFilterUi = false;
+
+	private Long selectedBeforeTimestamp = null;
+	private int[] filterDurationValues = new int[0];
 
 	private SubsAdapter subsAdapter = null;
 	private ActionBarDrawerToggle subsDrawerToggle;
@@ -131,6 +166,9 @@ public class MainFragment extends FragmentEx {
 			}
 		});
 
+		filterDrawerBinding = fragmentBinding.filterDrawer;
+		setupFilterDrawer();
+
 		videosPagerAdapter = new SimplePagerAdapter(getChildFragmentManager());
 
 		final int tabCount = videosPagerAdapter.getCount();
@@ -143,7 +181,10 @@ public class MainFragment extends FragmentEx {
 			@Override
 			public void onTabSelected(TabLayout.Tab tab) {
 				fragmentBinding.pager.setCurrentItem(tab.getPosition());
-
+				if (!isFeedFilteringEnabled()) {
+					closeFilterDrawer();
+				}
+				requireActivity().invalidateOptionsMenu();
 			}
 
 			@Override
@@ -208,6 +249,15 @@ public class MainFragment extends FragmentEx {
 		videosPagerAdapter = null;
 		subsDrawerBinding.subsDrawerRecyclerView.setAdapter(null); // cleanup the reference from the SubsAdapter back to the view
 		subsDrawerToggle = null;
+		if (filterDrawerListener != null) {
+			fragmentBinding.subsDrawerLayout.removeDrawerListener(filterDrawerListener);
+			filterDrawerListener = null;
+		}
+		if (filterApplyRunnable != null && filterDrawerBinding != null) {
+			filterDrawerBinding.getRoot().removeCallbacks(filterApplyRunnable);
+		}
+		filterApplyRunnable = null;
+		filterDrawerBinding = null;
 		fragmentBinding = null;
 		subsDrawerBinding = null;
 		super.onDestroyView();
@@ -419,6 +469,17 @@ public class MainFragment extends FragmentEx {
 			return getFragmentFrom(tab.getPosition(), createIfNotFound);
 		}
 
+		void refreshFeedTabs() {
+			for (String key : visibleTabs) {
+				VideosGridFragment fragment = createOrGetFromCache(key, false);
+				// Network feeds do not use the filters; reloading them would only reset their
+				// pagination and trigger unnecessary network requests.
+				if (fragment != null && fragment.isFeedFilteringEnabled()) {
+					fragment.refreshVideosWithFilters();
+				}
+			}
+		}
+
 		public synchronized VideosGridFragment selectTabAtPosition(int position) {
 			VideosGridFragment fragment = getFragmentFrom(position, true);
 			if (fragment != null) {
@@ -449,11 +510,12 @@ public class MainFragment extends FragmentEx {
 	}
 
 	/**
-	 * Returns true if the subscriptions drawer is opened.
+	 * Returns true if either of the drawers is opened.
 	 */
 	public boolean isDrawerOpen() {
 		if (fragmentBinding != null) {
-			return fragmentBinding.subsDrawerLayout.isDrawerOpen(GravityCompat.START);
+			return fragmentBinding.subsDrawerLayout.isDrawerOpen(GravityCompat.START)
+					|| fragmentBinding.subsDrawerLayout.isDrawerOpen(GravityCompat.END);
 		} else {
 			Logger.e(this, "subsDrawerLayout is null for isDrawerOpen");
 			Thread.dumpStack();
@@ -463,14 +525,235 @@ public class MainFragment extends FragmentEx {
 
 
 	/**
-	 * Close the subscriptions drawer.
+	 * Close any opened drawer.
 	 */
 	public void closeDrawer() {
 		if (fragmentBinding != null) {
-			fragmentBinding.subsDrawerLayout.closeDrawer(GravityCompat.START);
+			fragmentBinding.subsDrawerLayout.closeDrawers();
 		} else {
 			Logger.e(this, "subsDrawerLayout is null for closeDrawer");
 			Thread.dumpStack();
+		}
+	}
+
+	/**
+	 * Open or close the feed filter drawer (which is on the end/right side).
+	 */
+	public void toggleFilterDrawer() {
+		if (fragmentBinding == null || !isFeedFilteringEnabled()) {
+			return;
+		}
+		if (fragmentBinding.subsDrawerLayout.isDrawerOpen(GravityCompat.END)) {
+			closeFilterDrawer();
+		} else {
+			showFilterDrawer();
+		}
+	}
+
+	/**
+	 * @return True when the currently selected tab is backed by a local database and therefore
+	 * supports the feed filters.
+	 */
+	public boolean isFeedFilteringEnabled() {
+		if (fragmentBinding == null || videosPagerAdapter == null) {
+			return false;
+		}
+		final VideosGridFragment fragment = videosPagerAdapter.getFragmentFrom(
+				fragmentBinding.pager.getCurrentItem(), true);
+		return fragment != null && fragment.isFeedFilteringEnabled();
+	}
+
+	public void showFilterDrawer() {
+		if (fragmentBinding != null && isFeedFilteringEnabled()) {
+			fragmentBinding.subsDrawerLayout.openDrawer(GravityCompat.END);
+		}
+	}
+
+	private void closeFilterDrawer() {
+		if (fragmentBinding != null) {
+			fragmentBinding.subsDrawerLayout.closeDrawer(GravityCompat.END);
+		}
+	}
+
+	private void setupFilterDrawer() {
+		filterApplyRunnable = this::applyFiltersFromUi;
+		filterDrawerBinding.filterResetButton.setOnClickListener(v -> resetFeedFilters());
+		filterDrawerBinding.filterDateButton.setOnClickListener(v -> showDatePicker());
+		filterDrawerBinding.filterClearDateButton.setOnClickListener(v -> {
+			selectedBeforeTimestamp = null;
+			updateDateButton();
+			scheduleFilterApply();
+		});
+		filterDrawerBinding.filterUnwatchedCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> scheduleFilterApply());
+		filterDrawerBinding.filterPartiallyWatchedCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> scheduleFilterApply());
+		filterDurationValues = getResources().getIntArray(R.array.filter_duration_values);
+		filterDrawerBinding.filterShorterThanSpinner.setOnItemSelectedListener(durationSelectionListener(true));
+		filterDrawerBinding.filterLongerThanSpinner.setOnItemSelectedListener(durationSelectionListener(false));
+		filterDrawerBinding.filterTitleEdit.addTextChangedListener(filterTextWatcher);
+
+		filterDrawerListener = new DrawerLayout.DrawerListener() {
+			@Override
+			public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+			}
+
+			@Override
+			public void onDrawerStateChanged(int newState) {
+			}
+
+			@Override
+			public void onDrawerClosed(@NonNull View drawerView) {
+			}
+
+			@Override
+			public void onDrawerOpened(@NonNull View drawerView) {
+				if (drawerView.getId() == R.id.filter_drawer) {
+					syncFilterDrawerFromState();
+				}
+			}
+		};
+		fragmentBinding.subsDrawerLayout.addDrawerListener(filterDrawerListener);
+		syncFilterDrawerFromState();
+	}
+
+	/**
+	 * Reflect the currently active filters in the drawer's controls.
+	 */
+	private void syncFilterDrawerFromState() {
+		if (filterDrawerBinding == null) {
+			return;
+		}
+		syncingFilterUi = true;
+		try {
+			final FeedFilter filter = FeedFilter.getInstance();
+            synchronized (filter) {
+                selectedBeforeTimestamp = filter.getBeforeTimestamp();
+                updateDateButton();
+                filterDrawerBinding.filterUnwatchedCheckbox.setChecked(filter.isUnwatchedOnly());
+                filterDrawerBinding.filterPartiallyWatchedCheckbox.setChecked(filter.isPartiallyWatchedOnly());
+                selectDuration(filterDrawerBinding.filterShorterThanSpinner, filter.getMaxDurationMinutes());
+                selectDuration(filterDrawerBinding.filterLongerThanSpinner, filter.getMinDurationMinutes());
+                filterDrawerBinding.filterTitleEdit.setText(filter.getTitleQuery());
+            }
+		} finally {
+			syncingFilterUi = false;
+		}
+	}
+
+	private AdapterView.OnItemSelectedListener durationSelectionListener(boolean maximum) {
+		return new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				final Integer selected = durationValue(position);
+				final Integer current = maximum
+						? FeedFilter.getInstance().getMaxDurationMinutes()
+						: FeedFilter.getInstance().getMinDurationMinutes();
+				if (!Objects.equals(selected, current)) {
+					scheduleFilterApply();
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		};
+	}
+
+	private void selectDuration(Spinner spinner, Integer minutes) {
+		final int position = durationPosition(minutes);
+		if (spinner.getSelectedItemPosition() != position) {
+			spinner.setSelection(position);
+		}
+	}
+
+	private int durationPosition(Integer minutes) {
+		final int value = minutes == null ? 0 : minutes;
+		for (int i = 0; i < filterDurationValues.length; i++) {
+			if (filterDurationValues[i] == value) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	private Integer durationValue(int position) {
+		if (position < 0 || position >= filterDurationValues.length || filterDurationValues[position] == 0) {
+			return null;
+		}
+		return filterDurationValues[position];
+	}
+
+	private void updateDateButton() {
+		final String label = selectedBeforeTimestamp == null
+				? getString(R.string.filter_any_date)
+				: DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+						.format(new Date(selectedBeforeTimestamp));
+		filterDrawerBinding.filterDateButton.setText(label);
+		filterDrawerBinding.filterClearDateButton.setVisibility(
+				selectedBeforeTimestamp == null ? View.GONE : View.VISIBLE);
+	}
+
+	private void showDatePicker() {
+		final Calendar calendar = Calendar.getInstance();
+		if (selectedBeforeTimestamp != null) {
+			calendar.setTimeInMillis(selectedBeforeTimestamp);
+		}
+		new DatePickerDialog(requireContext(), (view, year, month, dayOfMonth) -> {
+			final Calendar selected = Calendar.getInstance();
+			selected.set(year, month, dayOfMonth);
+			selectedBeforeTimestamp = selected.getTimeInMillis();
+			updateDateButton();
+			scheduleFilterApply();
+		}, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+				calendar.get(Calendar.DAY_OF_MONTH)).show();
+	}
+
+	/**
+	 * Apply the current controls after the user has stopped changing them for a short while.
+	 */
+	private void scheduleFilterApply() {
+		if (syncingFilterUi || filterApplyRunnable == null || filterDrawerBinding == null) {
+			return;
+		}
+		final View root = filterDrawerBinding.getRoot();
+		root.removeCallbacks(filterApplyRunnable);
+		root.postDelayed(filterApplyRunnable, FILTER_DEBOUNCE_MS);
+	}
+
+	private void applyFiltersFromUi() {
+		if (filterDrawerBinding == null) {
+			return;
+		}
+		final Integer shorterThanMinutes = durationValue(
+				filterDrawerBinding.filterShorterThanSpinner.getSelectedItemPosition());
+		final Integer longerThanMinutes = durationValue(
+				filterDrawerBinding.filterLongerThanSpinner.getSelectedItemPosition());
+
+		final FeedFilter filter = FeedFilter.getInstance();
+        synchronized (filter) {
+            filter.setBeforeTimestamp(selectedBeforeTimestamp);
+            filter.setUnwatchedOnly(filterDrawerBinding.filterUnwatchedCheckbox.isChecked());
+            filter.setPartiallyWatchedOnly(filterDrawerBinding.filterPartiallyWatchedCheckbox.isChecked());
+            filter.setMaxDurationMinutes(shorterThanMinutes);
+            filter.setMinDurationMinutes(longerThanMinutes);
+            filter.setTitleQuery(filterDrawerBinding.filterTitleEdit.getText().toString());
+        }
+		refreshFilteredTabs();
+		requireActivity().invalidateOptionsMenu();
+	}
+
+	public void resetFeedFilters() {
+		FeedFilter.getInstance().clear();
+		if (filterApplyRunnable != null && filterDrawerBinding != null) {
+			filterDrawerBinding.getRoot().removeCallbacks(filterApplyRunnable);
+		}
+		syncFilterDrawerFromState();
+		refreshFilteredTabs();
+		requireActivity().invalidateOptionsMenu();
+	}
+
+	private void refreshFilteredTabs() {
+		if (videosPagerAdapter != null) {
+			videosPagerAdapter.refreshFeedTabs();
 		}
 	}
 

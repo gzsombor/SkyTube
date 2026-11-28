@@ -51,6 +51,7 @@ import free.rm.skytube.R;
 import free.rm.skytube.app.EventBus;
 import free.rm.skytube.app.Settings;
 import free.rm.skytube.app.SkyTubeApp;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.TLSSocketFactory;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeChannel;
@@ -329,6 +330,28 @@ public class MainActivity extends BaseActivity {
 		return true;
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		final MainFragment mainFragment = getMainFragment();
+		final boolean filterAvailable = mainFragment != null && mainFragment.isVisible()
+				&& mainFragment.isFeedFilteringEnabled();
+		final MenuItem filterItem = menu.findItem(R.id.menu_filter);
+		if (filterItem != null) {
+			filterItem.setVisible(filterAvailable);
+			final Drawable icon = filterItem.getIcon();
+			if (icon != null) {
+				final Drawable tinted = DrawableCompat.wrap(icon).mutate();
+				final boolean active = filterAvailable && FeedFilter.getInstance().isActive();
+				DrawableCompat.setTint(tinted, active
+						? ContextCompat.getColor(this, R.color.filter_active_tint)
+						: Color.WHITE);
+				filterItem.setIcon(tinted);
+			}
+		}
+		return true;
+	}
+
     private synchronized SearchHistoryCursorAdapter getSearchHistoryAdapter(final SearchView searchView) {
         SearchHistoryCursorAdapter searchHistoryCursorAdapter = (SearchHistoryCursorAdapter) searchView.getSuggestionsAdapter();
         if (searchHistoryCursorAdapter == null) {
@@ -349,6 +372,13 @@ public class MainActivity extends BaseActivity {
 			case R.id.menu_blocker:
 				videoBlockerPlugin.onMenuBlockerIconClicked();
 				return true;
+			case R.id.menu_filter: {
+				MainFragment mainFragment = getMainFragment();
+				if (mainFragment != null && mainFragment.isVisible()) {
+					mainFragment.toggleFilterDrawer();
+				}
+				return true;
+			}
 			case R.id.menu_preferences:
 				Intent i = new Intent(this, PreferencesActivity.class);
 				startActivity(i);
@@ -463,6 +493,7 @@ public class MainActivity extends BaseActivity {
 				}
 			} else {
 				super.onBackPressed();
+				invalidateOptionsMenu();
 			}
 		}
 	}
@@ -480,6 +511,7 @@ public class MainActivity extends BaseActivity {
 			transaction.addToBackStack(null);
 		}
 		transaction.commit();
+		invalidateOptionsMenu();
 	}
 
 

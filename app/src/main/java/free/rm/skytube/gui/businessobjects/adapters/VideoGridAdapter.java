@@ -49,7 +49,7 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 	private static final String TAG = VideoGridAdapter.class.getSimpleName();
 
 	public interface Callback {
-		void onVideoGridUpdated(boolean hasItems);
+		void onVideoGridUpdated(boolean hasItems, boolean videosFilteredOut);
 	}
 
 	/**
@@ -83,6 +83,8 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 	/** Set to true if the video adapter is initialized. */
 	private boolean initialized = false;
     private boolean refreshHappens = false;
+	/** Identifies the latest fetch, so results from superseded requests can be discarded. */
+	private long refreshId = 0;
 
 	private VideoGridAdapter.Callback videoGridUpdated;
 
@@ -212,7 +214,7 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 	 */
 	public final synchronized void refresh(boolean clearVideosList) {
 		if (getYouTubeVideos != null && !refreshHappens) {
-			refreshHappens = true;
+			final long requestId = startRequest();
 			if (clearVideosList) {
 				getYouTubeVideos.reset();
 			}
@@ -220,9 +222,27 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 			initialized = true;
 
 		compositeDisposable.add(YouTubeTasks.getYouTubeVideos(getYouTubeVideos, this,
-				swipeRefreshLayout, clearVideosList)
+				swipeRefreshLayout, clearVideosList, requestId)
 				.subscribe(videos -> {}, error -> Logger.e(this, error, "Error refreshing videos")));
 		}
+	}
+
+	/**
+	 * Restart the feed from scratch even if another request is currently running.  Used when the
+	 * user changes the feed filters.
+	 */
+	public synchronized void refreshWithFilters() {
+		refreshHappens = false;
+		refresh(true);
+	}
+
+	public synchronized long getRefreshId() {
+		return refreshId;
+	}
+
+	private synchronized long startRequest() {
+		refreshHappens = true;
+		return ++refreshId;
 	}
 
 	@Override
@@ -233,19 +253,19 @@ public class VideoGridAdapter extends RecyclerViewAdapterEx<CardData, GridViewHo
 		if (position >= getItemCount() - 1) {
 			Logger.d(this, "BOTTOM REACHED!!!");
 			if(getYouTubeVideos != null) {
-				refreshHappens = true;
+				final long requestId = startRequest();
 				compositeDisposable.add(YouTubeTasks.getYouTubeVideos(getYouTubeVideos, this,
-						swipeRefreshLayout, false)
+						swipeRefreshLayout, false, requestId)
 						.subscribe(videos -> {}, error -> Logger.e(this, error, "Error loading more videos")));
 			}
 		}
 	}
 
-    public synchronized void notifyVideoGridUpdated() {
+    public synchronized void notifyVideoGridUpdated(boolean videosFilteredOut) {
         refreshHappens = false;
         if (videoGridUpdated != null) {
             int itemCount = getItemCount();
-            videoGridUpdated.onVideoGridUpdated(itemCount > 0);
+            videoGridUpdated.onVideoGridUpdated(itemCount > 0, videosFilteredOut);
         }
     }
 

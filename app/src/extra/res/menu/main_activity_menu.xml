@@ -20,6 +20,12 @@
 		app:actionLayout="@layout/menu_action_item_badge"
 		app:showAsAction="ifRoom" />
 
+	<item
+		android:id="@+id/menu_filter"
+		android:title="@string/filter_menu_title"
+		android:icon="@drawable/ic_filter"
+		app:showAsAction="ifRoom" />
+
 	<item android:id="@+id/menu_enter_video_url"
 		  android:title="@string/enter_video_url"
 		  app:showAsAction="never"/>

@@ -20,6 +20,7 @@ package free.rm.skytube.businessobjects.YouTube;
 import java.util.ArrayList;
 import java.util.List;
 
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.db.DownloadedVideosDb;
 
@@ -38,7 +39,8 @@ public class GetDownloadedVideos extends GetYouTubeVideos {
 	public List<CardData> getNextVideos() {
 		if (!noMoreVideoPages()) {
 			noMoreVideoPages = true;
-			return new ArrayList<>(DownloadedVideosDb.getVideoDownloadsDb().getDownloadedVideos());
+			return new ArrayList<>(DownloadedVideosDb.getVideoDownloadsDb()
+					.getDownloadedVideos(FeedFilter.getInstance()));
 		}
 
 		return null;

@@ -3,6 +3,7 @@
 	<color name="colorPrimary">#263238</color>
 	<color name="colorPrimaryDark">#21272B</color>
 	<color name="colorAccent">#26A69A</color>
+	<color name="filter_active_tint">#69F0AE</color>
 	<color name="brightText">#FFF</color>
 	<color name="darkerText">#F5F5F5</color>
 

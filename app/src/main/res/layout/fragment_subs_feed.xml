@@ -31,4 +31,39 @@
 			style="@style/ImportSubscriptionsButton"/>
 	</LinearLayout>
 
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:id="@+id/noFilteredVideosText"
+		android:visibility="gone"
+		android:background="@color/grid_view_background">
+		<TextView
+			android:text="@string/filter_no_matches"
+			style="@style/NoItemFoundMsgTextView"/>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:orientation="horizontal">
+
+			<Button
+				android:id="@+id/resetFiltersButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/filter_reset_filters" />
+
+			<Button
+				android:id="@+id/showFiltersButton"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:text="@string/filter_show_filters" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+
 </FrameLayout>

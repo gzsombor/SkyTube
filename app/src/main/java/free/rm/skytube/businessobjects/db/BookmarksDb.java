@@ -34,6 +34,7 @@ import java.util.Set;
 
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.Utils;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.JsonSerializer;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
@@ -89,6 +90,7 @@ public class BookmarksDb extends CardEventEmitterDatabase implements OrderableDa
 		ContentValues values = new ContentValues();
 		values.put(BookmarksTable.COL_YOUTUBE_VIDEO_ID, video.getId());
 		values.put(BookmarksTable.COL_YOUTUBE_VIDEO, jsonSerializer.toPersistedVideoJson(video).getBytes());
+		putFilterValues(values, video);
 
 		int order = getMaximumOrderNumber();
 		order++;
@@ -224,15 +226,16 @@ public class BookmarksDb extends CardEventEmitterDatabase implements OrderableDa
 
 
 	/**
-	 * Get the list of Videos that have been bookmarked.
+	 * Get the list of bookmarked Videos, applying the feed filters in SQL before the limit.
 	 *
 	 * @return List of Videos
 	 */
-	public @NonNull Pair<List<YouTubeVideo>, Integer> getBookmarkedVideos(int limit, Integer maxOrderLimit) {
+	public @NonNull Pair<List<YouTubeVideo>, Integer> getBookmarkedVideos(int limit, Integer maxOrderLimit,
+																		FeedFilter feedFilter) {
         SkyTubeApp.nonUiThread();
 
         SQLiteDatabase db = getReadableDatabase();
-        try (Cursor	cursor = createBookmarkQuery(limit, maxOrderLimit, db)) {
+        try (Cursor	cursor = createBookmarkQuery(limit, maxOrderLimit, db, feedFilter)) {
             List<YouTubeVideo> videos = new ArrayList<>();
 
             Integer minOrder = null;
@@ -246,7 +249,8 @@ public class BookmarksDb extends CardEventEmitterDatabase implements OrderableDa
                     minOrder = Utils.min(currentOrder, minOrder);
 
                     // convert JSON into YouTubeVideo
-                    YouTubeVideo video = jsonSerializer.fromPersistedVideoJson(blob);
+                    YouTubeVideo video = jsonSerializer.fromPersistedVideoJson(blob)
+                            .updatePublishTimestampFromDate();
 
                     // add the video to the list
                     videos.add(video);
@@ -256,12 +260,64 @@ public class BookmarksDb extends CardEventEmitterDatabase implements OrderableDa
         }
     }
 
-    private static Cursor createBookmarkQuery(int limit, Integer maxOrderLimit, SQLiteDatabase db) {
-        return maxOrderLimit != null ?
-                db.rawQuery(
-                        BookmarksTable.PAGED_QUERY, new String[]{String.valueOf(maxOrderLimit), String.valueOf(limit)}) :
-                db.rawQuery(
-                        BookmarksTable.PAGED_QUERY_UNBOUNDED, new String[]{String.valueOf(limit)});
+    static Cursor createBookmarkQuery(int limit, Integer maxOrderLimit, SQLiteDatabase db,
+                                      FeedFilter feedFilter) {
+        final List<String> conditions = new ArrayList<>();
+        final List<String> args = new ArrayList<>();
+        if (maxOrderLimit != null) {
+            conditions.add("b." + BookmarksTable.COL_ORDER + " < ?");
+            args.add(String.valueOf(maxOrderLimit));
+        }
+        if (feedFilter != null) {
+            final String filterConditions = feedFilter.buildSqlWhere("b", args);
+            if (!filterConditions.isEmpty()) {
+                conditions.add("(" + filterConditions + ")");
+            }
+        }
+        final String selection = conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);
+        args.add(String.valueOf(limit));
+        final String query = String.format(
+                "SELECT b.%1$s,b.%2$s FROM %3$s b%4$s ORDER BY b.%2$s DESC LIMIT ?",
+                BookmarksTable.COL_YOUTUBE_VIDEO, BookmarksTable.COL_ORDER,
+                BookmarksTable.TABLE_NAME, selection);
+        return db.rawQuery(query, args.toArray(new String[0]));
+    }
+
+    private static void putFilterValues(ContentValues values, YouTubeVideo video) {
+        video.updatePublishTimestampFromDate();
+        if (video.getTitle() == null) {
+            values.putNull(BookmarksTable.COL_TITLE.name());
+        } else {
+            values.put(BookmarksTable.COL_TITLE.name(), video.getTitle());
+        }
+        values.put(BookmarksTable.COL_DURATION.name(), video.getDurationInSeconds());
+        final Long publishTimestamp = video.getPublishTimestamp();
+        values.put(BookmarksTable.COL_PUBLISH_TIME.name(), publishTimestamp == null ? 0L : publishTimestamp);
+    }
+
+    /**
+     * Fill the flat filter columns for bookmarks which were stored before those columns existed.
+     */
+    static void populateFilterColumns(SQLiteDatabase db) {
+        final JsonSerializer serializer = new JsonSerializer();
+        final String query = String.format("SELECT %1$s,%2$s FROM %3$s",
+                BookmarksTable.COL_YOUTUBE_VIDEO_ID, BookmarksTable.COL_YOUTUBE_VIDEO,
+                BookmarksTable.TABLE_NAME);
+        try (Cursor cursor = db.rawQuery(query, null)) {
+            final int idIdx = cursor.getColumnIndexOrThrow(BookmarksTable.COL_YOUTUBE_VIDEO_ID);
+            final int videoIdx = cursor.getColumnIndexOrThrow(BookmarksTable.COL_YOUTUBE_VIDEO);
+            while (cursor.moveToNext()) {
+                final YouTubeVideo video = serializer.fromPersistedVideoJson(cursor.getBlob(videoIdx));
+                if (video == null) {
+                    continue;
+                }
+                final ContentValues values = new ContentValues();
+                putFilterValues(values, video);
+                db.update(BookmarksTable.TABLE_NAME, values,
+                        BookmarksTable.COL_YOUTUBE_VIDEO_ID + " = ?",
+                        new String[]{cursor.getString(idIdx)});
+            }
+        }
     }
 
     /**

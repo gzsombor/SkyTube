@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 
 import free.rm.skytube.app.SkyTubeApp;
 import free.rm.skytube.app.Utils;
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.JsonSerializer;
 import free.rm.skytube.businessobjects.Logger;
 import free.rm.skytube.businessobjects.YouTube.POJOs.ChannelView;
@@ -87,7 +88,7 @@ public class SubscriptionsDb extends SQLiteOpenHelper {
      */
     private List<File> legacyFilesToDelete = Collections.emptyList();
 
-    private static final int DATABASE_VERSION = 20;
+    private static final int DATABASE_VERSION = 22;
 
     static final String DATABASE_NAME = "subs.db";
 
@@ -139,6 +140,10 @@ public class SubscriptionsDb extends SQLiteOpenHelper {
         // Normally the legacy files are imported by onUpgrade (version 19 -> 20). Handle the case
         // where subs.db is missing as well, e.g. after restoring an incomplete backup.
         legacyFilesToDelete = LegacyDatabaseMigration.importLegacyDatabases(db, getLegacyDatabasesDirectory());
+        SQLiteHelper.execSQLUpdates(db, BookmarksTable.getAddFilterColumns());
+        SQLiteHelper.execSQLUpdates(db, DownloadedVideosTable.getAddFilterColumns());
+        BookmarksDb.populateFilterColumns(db);
+        DownloadedVideosDb.populateFilterColumns(db);
     }
 
 	@Override
@@ -220,6 +225,16 @@ public class SubscriptionsDb extends SQLiteOpenHelper {
             // Version 20 moves every table into subs.db. Import the data of the old, separate
             // databases (including backups which still contain them) into their new home.
             legacyFilesToDelete = LegacyDatabaseMigration.importLegacyDatabases(db, getLegacyDatabasesDirectory());
+        }
+        if (upgrade.executeStep(21)) {
+            // Version 21 adds flat columns to Bookmarks so the feed filters can be applied in SQL.
+            SQLiteHelper.execSQLUpdates(db, BookmarksTable.getAddFilterColumns());
+            BookmarksDb.populateFilterColumns(db);
+        }
+        if (upgrade.executeStep(22)) {
+            // Version 22 does the same for downloaded videos.
+            SQLiteHelper.execSQLUpdates(db, DownloadedVideosTable.getAddFilterColumns());
+            DownloadedVideosDb.populateFilterColumns(db);
         }
     }
 
@@ -720,23 +735,37 @@ public class SubscriptionsDb extends SQLiteOpenHelper {
     }
 
     /**
-     * Query the database to retrieve number of videos for subscribed channels starting from the given video.
+     * Query the database to retrieve a page of videos for subscribed channels starting from the given
+     * video.  Feed filters are applied by the database, before the limit is applied, so pagination
+     * only walks through videos which actually match the filters.
+     *
      * @return a list of {@link YouTubeVideo}
      */
-    public List<YouTubeVideo> getSubscriptionVideoPage(int limit, String videoId, long beforeTimestamp) {
+    public List<YouTubeVideo> getSubscriptionVideoPage(int limit, String videoId, long beforeTimestamp,
+                                                       FeedFilter feedFilter) {
         SkyTubeApp.nonUiThread();
 
-        final String selection;
         final String sortingColumn = SubscriptionsVideosTable.COL_PUBLISH_TIME.name();
-        final String[] selectionArguments;
+        final List<String> conditions = new ArrayList<>();
+        final List<String> selectionArgs = new ArrayList<>();
         if (videoId != null) {
-            selection = "WHERE (" + sortingColumn + " < ?) OR (" + sortingColumn + " = ? AND " + SubscriptionsVideosTable.COL_YOUTUBE_VIDEO_ID + " > ?)";
-            String formatted = String.valueOf(beforeTimestamp);
-            selectionArguments = new String[]{ formatted, formatted, videoId };
-        } else {
-            selection = "";
-            selectionArguments = null;
+            conditions.add("((" + sortingColumn + " < ?) OR (" + sortingColumn + " = ? AND "
+                    + SubscriptionsVideosTable.COL_YOUTUBE_VIDEO_ID + " > ?))");
+            final String formatted = String.valueOf(beforeTimestamp);
+            selectionArgs.add(formatted);
+            selectionArgs.add(formatted);
+            selectionArgs.add(videoId);
         }
+        if (feedFilter != null) {
+            final String filterConditions = feedFilter.buildSqlWhere("s", selectionArgs);
+            if (!filterConditions.isEmpty()) {
+                conditions.add("(" + filterConditions + ")");
+            }
+        }
+
+        final String selection = conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);
+        final String[] selectionArguments = selectionArgs.isEmpty()
+                ? null : selectionArgs.toArray(new String[0]);
         final String sorting = " ORDER BY " + sortingColumn + " DESC, " + SubscriptionsVideosTable.COL_YOUTUBE_VIDEO_ID + " ASC limit "+ limit;
         String query = SubscriptionsVideosTable.BASE_QUERY + selection + sorting;
         try (Stopwatch s = new Stopwatch("getVideos " + query + ",limit=" + limit + ", beforeTimestamp=" + beforeTimestamp+" videoid="+videoId)) {

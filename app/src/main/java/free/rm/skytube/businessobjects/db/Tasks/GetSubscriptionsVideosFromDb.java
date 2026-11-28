@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import free.rm.skytube.businessobjects.FeedFilter;
 import free.rm.skytube.businessobjects.YouTube.GetYouTubeVideos;
 import free.rm.skytube.businessobjects.YouTube.POJOs.CardData;
 import free.rm.skytube.businessobjects.YouTube.POJOs.YouTubeVideo;
@@ -44,7 +45,8 @@ public class GetSubscriptionsVideosFromDb extends GetYouTubeVideos {
 	@Override
 	public synchronized List<CardData> getNextVideos() {
 		if (!noMoreVideoPages()) {
-			List<YouTubeVideo> result = SubscriptionsDb.getSubscriptionsDb().getSubscriptionVideoPage(20, lastVideoId, lastVideoPublishTimestamp);
+			List<YouTubeVideo> result = SubscriptionsDb.getSubscriptionsDb().getSubscriptionVideoPage(
+					20, lastVideoId, lastVideoPublishTimestamp, FeedFilter.getInstance());
 			if (result.isEmpty()) {
 				noMoreVideoPages = true;
 				lastVideoId = null;

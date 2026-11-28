@@ -65,8 +65,26 @@ public abstract class BaseVideosGridFragment extends TabFragment implements Swip
 
 	@Override
 	public void onRefresh() {
-		videoGridAdapter.refresh(true);
+		refreshVideos();
 		updateCount = PlaybackStatusDb.getPlaybackStatusDb().getUpdateCounter();
+	}
+
+	/**
+	 * Reload the videos from the beginning, e.g. after the feed filters have changed.
+	 */
+	public void refreshVideos() {
+		if (videoGridAdapter != null) {
+			videoGridAdapter.refresh(true);
+		}
+	}
+
+	/**
+	 * Reload the videos from the beginning, replacing any request which is still in flight.
+	 */
+	public void refreshVideosWithFilters() {
+		if (videoGridAdapter != null) {
+			videoGridAdapter.refreshWithFilters();
+		}
 	}
 
 	/**

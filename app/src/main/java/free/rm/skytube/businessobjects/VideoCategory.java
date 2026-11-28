@@ -95,6 +95,22 @@ public enum VideoCategory {
 		return videoFiltering;
 	}
 
+	/**
+	 * Feed filters are only supported by feeds backed by the local database, because the filters
+	 * are applied in SQL before paging.  Network feeds (featured, trending, search, channel and
+	 * playlists) do not get the filter button at all.
+	 */
+	public boolean isFeedFilteringEnabled() {
+		switch (this) {
+			case SUBSCRIPTIONS_FEED_VIDEOS:
+			case BOOKMARKS_VIDEOS:
+			case DOWNLOADED_VIDEOS:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 
 	/**
 	 * Create an appropriate class to get videos of a channel.

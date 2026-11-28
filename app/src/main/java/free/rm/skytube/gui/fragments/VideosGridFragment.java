@@ -84,6 +84,10 @@ public abstract class VideosGridFragment extends BaseVideosGridFragment {
         gridviewBinding.gridView.smoothScrollToPosition(0);
     }
 
+    boolean isFeedFilteringEnabled() {
+        return getVideoCategory().isFeedFilteringEnabled();
+    }
+
     /**
      * @return Returns the category of videos being displayed by this fragment.
      */
